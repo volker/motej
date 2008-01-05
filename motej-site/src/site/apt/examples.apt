@@ -28,7 +28,28 @@ Examples
  
 * AdvancedDiscovery Example
 
- To be written..
+ Instead of calling the MoteFinder.findMote() method mentioned above, you can also add a MoteFinderListener to the MoteFinder instance and inquire Motes using startDiscovery and stopDiscovery.
+
++--
+	MoteFinderListener listener = new MoteFinderListener() {
+		
+		public void moteFound(Mote mote) {
+			System.out.println("Found mote: " + mote.getBluetoothAddress());
+			mote.rumble(2000l);
+			motes.add(mote);
+		}
+		
+	};
+		
+	MoteFinder finder = MoteFinder.getMoteFinder();
+	finder.addMoteFinderListener(listener);
+		
+	finder.startDiscovery();
+	Thread.sleep(30000l);
+	finder.stopDiscovery();
++--
+ 
+ {{{reference/0.8-SNAPSHOT/motej-demos/xref/motej/demos/discovery/AdvancedDiscovery.html}Source Code}}
 
 * ButtonsDemo Example
 
@@ -56,8 +77,54 @@ Examples
 
 * AccelerometerDemo Example
 
- To be written..
+ In order to intercept Accelerometer Events, just add a AccelerometerListener to your Mote instance and set a report mode that contains accelerometer data.
+ 
++--
+	AccelerometerListener listener = new AccelerometerListener() {
+		
+		public void accelerometerChanged(AccelerometerEvent evt) {
+			System.out.println(evt.getX() + " : " + evt.getY() + " : " + evt.getZ());
+		}
+		
+	};
+		
+	Mote mote = MoteFinder.getMoteFinder().findMote();
+	mote.addAccelerometerListener(listener);
+	mote.setReportMode(ReportModeRequest.DATA_REPORT_0x31);
+		
+	Thread.sleep(60000l);
+		
+	mote.setReportMode(ReportModeRequest.DATA_REPORT_0x30);
+	mote.disconnect();
++--
+
+ I do reset the report mode to 'Core Button data only' before disconnecting the Wiimote, as I've found my Bluetooth stack crashing sometimes if I didn't.
+ 
+ {{{reference/0.8-SNAPSHOT/motej-demos/xref/motej/demos/accelerometer/AccelerometerDemo.html}Source Code}}
  
 * IrCameraDemo Example
 
- To be written..
+ Using IrCamera events is quite similar to accessing the accelerometer data. Just add the IrCameraListener to your Mote instance.
+
++--
+	IrCameraListener listener = new IrCameraListener() {
+		
+		public void irImageChanged(IrCameraEvent evt) {
+			System.out.println(evt.getX() + " : " + evt.getY());
+		}
+		
+	};
+		
+	Mote mote = MoteFinder.getMoteFinder().findMote();
+	mote.addIrCameraListener(listener);
+	mote.enableIrCamera();
+	mote.setReportMode(ReportModeRequest.DATA_REPORT_0x36);
+		
+	Thread.sleep(60000l);
+		
+	mote.setReportMode(ReportModeRequest.DATA_REPORT_0x30);
+	mote.disableIrCamera();
+	mote.disconnect();
++--
+ 
+ {{{reference/0.8-SNAPSHOT/motej-demos/xref/motej/demos/ircamera/IrCameraDemo.html}Source Code}}
