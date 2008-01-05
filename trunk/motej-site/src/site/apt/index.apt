@@ -1,0 +1,30 @@
+ ----
+ Introduction
+ -----
+ -----
+ 2008-01-03
+ -----
+
+Introduction
+
+ motej is a slim Java library for Wiimote communication, licensed under ASL 2.0
+
+* Architecture
+
+ <motej> consists of two main packages, the <motej library> and the <motej extras.> While <motej extras> depends on <motej library> and will offer additional functionality, <motej library> provides basic Wiimote access and depends only on a JSR 82 (Bluetooth) implementation and <commons-logging.>
+  
+[images/motej-layers.png] layering
+  
+* motej library
+
+ The design vision of <motej library> is to provide an lightweight and easy to use API for Wiimote communication. Wiimote data should be provided as unchanged as possible.
+ 
+ Consult documentation of the <motej library> for more information.
+
+* motej extras
+
+ The motej extras package will provide additional APIs for e.g. roll and distance calculation based on IR and Accelerometer data provided by <motej library.> 
+
+* motej demos
+
+ The demos package contains example code for both <motej library> and <motej extras.>
