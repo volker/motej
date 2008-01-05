@@ -105,6 +105,7 @@ public class Mote {
 	}
 
 	public void disconnect() {
+		log.info("Disconnecting Mote " + bluetoothAddress);
 		if (outgoing != null) {
 			outgoing.disconnect();
 			try {

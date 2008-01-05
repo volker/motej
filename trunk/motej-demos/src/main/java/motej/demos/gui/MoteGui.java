@@ -39,14 +39,17 @@ import motej.IrCameraMode;
 import motej.IrCameraSensitivity;
 import motej.Mote;
 import motej.MoteFinder;
-import motej.event.AccelerometerEvent;
-import motej.event.AccelerometerListener;
 import motej.event.CoreButtonEvent;
 import motej.event.CoreButtonListener;
 import motej.event.IrCameraEvent;
 import motej.event.IrCameraListener;
 import motej.request.ReportModeRequest;
 
+/**
+ * 
+ * <p>
+ * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
+ */
 @SuppressWarnings("serial")
 public class MoteGui {
 	
@@ -139,7 +142,7 @@ public class MoteGui {
 
 	private Mote mote;
 	
-	private int accx, accy, accz;
+//	private int accx, accy, accz;
 
 	private boolean[] leds = new boolean[] { false, false, false, false };
 
@@ -176,16 +179,16 @@ public class MoteGui {
 				}
 				System.out.println(mote.getCalibrationDataReport());
 				
-				mote.addAccelerometerListener(new AccelerometerListener() {
-				
-					public void accelerometerChanged(AccelerometerEvent evt) {
-						accx = evt.getX();
-						accy = evt.getY();
-						accz = evt.getZ();
-//						glpanel.repaint();
-					}
-				
-				});
+//				mote.addAccelerometerListener(new AccelerometerListener() {
+//				
+//					public void accelerometerChanged(AccelerometerEvent evt) {
+//						accx = evt.getX();
+//						accy = evt.getY();
+//						accz = evt.getZ();
+////						glpanel.repaint();
+//					}
+//				
+//				});
 				
 				mote.addIrCameraListener(new IrCameraListener() {
 					
@@ -416,7 +419,7 @@ public class MoteGui {
 		
 		ircomp = new MoteGui.IRCompentent();
 		ircomp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		ircomp.setPreferredSize(new Dimension(600, 600));
+		ircomp.setPreferredSize(new Dimension(1024, 768));
 		
 //		glpanel = new GLJPanel();
 //		glpanel.addGLEventListener(new MoteGui.AccelerometerComponent());

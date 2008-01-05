@@ -13,23 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package motej.demos.discovery;
+package motej;
 
-import motej.Mote;
-import motej.MoteFinder;
+import java.util.EventListener;
 
 /**
  * 
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class SimpleDiscovery {
+public interface MoteFinderListener extends EventListener {
 
-	public static void main(String[] args) throws InterruptedException {
-		Mote mote = MoteFinder.getMoteFinder().findMote();
-		mote.setPlayerLeds(new boolean[] {true, false, false, false});
-		Thread.sleep(5000l);
-		mote.disconnect();
-	}
-
+	public void moteFound(Mote mote);
+	
 }

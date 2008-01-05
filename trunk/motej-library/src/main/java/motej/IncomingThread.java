@@ -56,12 +56,6 @@ class IncomingThread extends Thread {
 
 	public void disconnect() {
 		active = false;
-		try {
-			incoming.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	protected void parseAccelerometerData(byte[] bytes) {
@@ -152,13 +146,9 @@ class IncomingThread extends Thread {
 		int size = (bytes[4] >> 4) & 0x0f;
 		int error = bytes[4] & 0x0f;
 		byte[] address = new byte[] { bytes[5], bytes[6] };
-		System.out.println(size);
 		byte[] payload = new byte[size];
 
 		System.arraycopy(bytes, 7, payload, 0, size);
-//		for (int i = 0; i < size; i++) {
-//			payload[i] = bytes[7 + i];
-//		}
 
 		source.fireReadDataEvent(address, payload, error);
 	}
@@ -275,6 +265,11 @@ class IncomingThread extends Thread {
 				log.error("connection closed?", ex);
 				active = false;
 			}
+		}
+		try {
+			incoming.close();
+		} catch (IOException ex) {
+			log.error(ex);
 		}
 	}
 }
