@@ -21,10 +21,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.bluetooth.L2CAPConnection;
 import javax.microedition.io.Connector;
 
-import motej.request.PlayerLedRequest;
-import motej.request.ReportModeRequest;
-import motej.request.RumbleRequest;
 import motej.request.MoteRequest;
+import motej.request.PlayerLedRequest;
+import motej.request.RumbleRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * 
@@ -34,6 +36,8 @@ import motej.request.MoteRequest;
 class OutgoingThread extends Thread {
 
 		private static final long THREAD_SLEEP = 10l;
+		
+		private Log log = LogFactory.getLog(OutgoingThread.class);
 
 		private volatile boolean active;
 
@@ -52,33 +56,13 @@ class OutgoingThread extends Thread {
 					+ ":11;authenticate=false;encrypt=false;master=false",
 					Connector.WRITE);
 
-//			outgoing.send(new byte[] { 82, 17, (byte) (1 << 7) });
 			requestQueue = new ConcurrentLinkedQueue<MoteRequest>();
 			Thread.sleep(THREAD_SLEEP);
 			active = true;
 		}
 
-		public void sendRequest(MoteRequest request) {
-			requestQueue.add(request);
-		}
-
 		public void disconnect() {
 			active = false;
-			try {
-				sendRequest(new ReportModeRequest(ReportModeRequest.DATA_REPORT_0x30));
-				while(!requestQueue.isEmpty()) {
-					try {
-						Thread.sleep(10l);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				outgoing.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 
 		public void run() {
@@ -112,6 +96,15 @@ class OutgoingThread extends Thread {
 					active = false;
 				}
 			}
+			try {
+				outgoing.close();
+			} catch (IOException ex) {
+				log.error(ex);
+			}
+		}
+
+		public void sendRequest(MoteRequest request) {
+			requestQueue.add(request);
 		}
 
 	}

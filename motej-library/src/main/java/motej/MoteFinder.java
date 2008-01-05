@@ -24,6 +24,7 @@ import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
+import javax.swing.event.EventListenerList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,10 +36,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class MoteFinder {
 	
-	private Log log = LogFactory.getLog(MoteFinder.class);
-
 	private static MoteFinder instance;
-
+	
 	/**
 	 * Returns the <code>WiimoteFinder</code> instance.
 	 * 
@@ -58,8 +57,12 @@ public class MoteFinder {
 		}
 	}
 
+	private Log log = LogFactory.getLog(MoteFinder.class);
+	
+	private EventListenerList listenerList = new EventListenerList();
+	
 	private Object inquiryCompletedEvent = new Object();
-
+	
 	private DiscoveryAgent discoveryAgent;
 
 	protected final DiscoveryListener listener = new DiscoveryListener() {
@@ -75,22 +78,30 @@ public class MoteFinder {
 							+ clazz.getServiceClasses());
 				}
 
-				if (device.getFriendlyName(true).compareTo(
-						"Nintendo RVL-CNT-01") == 0) {
-					mote = new Mote(device);
-					discoveryAgent.cancelInquiry(this);
+				if (clazz.getMajorDeviceClass() == 1280 &&
+						clazz.getMinorDeviceClass() == 4 &&
+						device.getFriendlyName(true).startsWith("Nintendo")) {
+					if (advancedDiscovery) {
+						Mote mote = new Mote(device);
+						fireMoteFound(mote);
+					} else {
+						mote = new Mote(device);
+						discoveryAgent.cancelInquiry(this);
+					}
 				}
 			} catch (IOException ex) {
 				throw new RuntimeException(ex.fillInStackTrace());
 			}
 		}
 
-		public void inquiryCompleted(int arg0) {
-			if (log.isInfoEnabled()) {
-				log.info("inquiry completed.");
-			}
-			synchronized (inquiryCompletedEvent) {
-				inquiryCompletedEvent.notifyAll();
+		public void inquiryCompleted(int discType) {
+			if (discType == DiscoveryListener.INQUIRY_TERMINATED) {
+				if (log.isInfoEnabled()) {
+					log.info("inquiry completed: " + discType);
+				}
+				synchronized (inquiryCompletedEvent) {
+					inquiryCompletedEvent.notifyAll();
+				}
 			}
 		}
 
@@ -103,13 +114,19 @@ public class MoteFinder {
 		}
 	};
 
-	private LocalDevice localDevice;;
+	private LocalDevice localDevice;
 
 	private Mote mote;
 
-	protected MoteFinder() {
-	}
+	private boolean advancedDiscovery = false;
 
+	protected MoteFinder() {
+	};
+
+	public void addMoteFinderListener(MoteFinderListener listener) {
+		listenerList.add(MoteFinderListener.class, listener);
+	}
+	
 	public Mote findMote() {
 		try {
 			synchronized (inquiryCompletedEvent) {
@@ -128,6 +145,31 @@ public class MoteFinder {
 		} catch (InterruptedException ex) {
 			throw new RuntimeException(ex.fillInStackTrace());
 		}
+	}
+
+	protected void fireMoteFound(Mote mote) {
+		MoteFinderListener[] listeners = listenerList.getListeners(MoteFinderListener.class);
+		for (MoteFinderListener l : listeners) {
+			l.moteFound(mote);
+		}
+	}
+
+	public void removeMoteFinderListener(MoteFinderListener listener) {
+		listenerList.remove(MoteFinderListener.class, listener);
+	}
+	
+	public void startDiscovery() {
+		advancedDiscovery = true;
+		try {
+			discoveryAgent.startInquiry(DiscoveryAgent.GIAC, listener);
+		} catch (BluetoothStateException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	public void stopDiscovery() {
+		discoveryAgent.cancelInquiry(listener);
+		advancedDiscovery = false;
 	}
 
 //	public List<Mote> findPreknownOrCachedWiimotes() {
