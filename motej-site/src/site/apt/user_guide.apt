@@ -1,0 +1,11 @@
+ ----
+ User Guide
+ -----
+ -----
+ 2008-01-05
+ -----
+
+User Guide
+
+ Unfortunately, the User Guide has not been written yet. For the time being, have a look at the {{{examples.html}examples}}, the javadocs and the source code.
+ Just {{{download.html}download}} the current snapshot and play around a little. It's a rather small API - you will find your way.

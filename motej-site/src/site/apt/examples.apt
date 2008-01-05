@@ -1,0 +1,63 @@
+ ----
+ Examples
+ -----
+ -----
+ 2008-01-05
+ -----
+
+Examples
+
+ The motej-demos package contains sample code, that should help you in adopting motej for your own projects.
+ 
+* SimpleDiscovery Example
+
+ Getting access to a Mote Instance is actually quite easy. Just call the findMote() method of the singleton MoteFinder instance.
+ 
++--
+	public static void main(String[] args) throws InterruptedException {
+		Mote mote = MoteFinder.getMoteFinder().findMote();
+		mote.setPlayerLeds(new boolean[] {true, false, false, false});
+		Thread.sleep(5000l);
+		mote.disconnect();
+	}
++--
+
+ In this example, we look up a Wiimote (make sure you've pressed both <1> and <2> buttons to put the Wiimote into discoverable mode), set the LED indicating the first player and disconnect after 5 seconds.
+ 
+ {{{reference/0.8-SNAPSHOT/motej-demos/xref/motej/demos/discovery/SimpleDiscovery.html}Source Code}}
+ 
+* AdvancedDiscovery Example
+
+ To be written..
+
+* ButtonsDemo Example
+
+ To react on button events propagated by motej, simply attach a CoreButtonListener instance to your Mote object.
+ 
++--
+	mote.addCoreButtonListener(new CoreButtonListener() {
+		
+		public void buttonPressed(CoreButtonEvent evt) {
+			if (evt.isButtonAPressed()) {
+				System.out.println("Button A pressed!");
+			}
+			if (evt.isButtonBPressed()) {
+				System.out.println("Button B pressed!");
+			}
+			if (evt.isNoButtonPressed()) {
+				System.out.println("No button pressed.");
+			}
+		}
+		
+	});
++--
+
+ {{{reference/0.8-SNAPSHOT/motej-demos/xref/motej/demos/buttons/ButtonsDemo.html}Source Code}}
+
+* AccelerometerDemo Example
+
+ To be written..
+ 
+* IrCameraDemo Example
+
+ To be written..
