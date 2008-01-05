@@ -14,8 +14,8 @@
 	<name>motej site</name>
 	<distributionManagement>
 		<site>
-			<id>ker</id>
-			<url>scp://ker:242/home/volker/public_html</url>
+			<id>sourceforge</id>
+			<url>scp://shell.sourceforge.net:/home/groups/m/mo/motej/htdocs</url>
 		</site>
 	</distributionManagement>
 	<scm>
