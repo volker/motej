@@ -5,7 +5,7 @@
 	<groupId>motej</groupId>
 	<artifactId>motej</artifactId>
 	<packaging>pom</packaging>
-	<version>0.8</version>
+	<version>0.9-SNAPSHOT</version>
 	<name>motej</name>
 	<description>motej is an Apache licensed Wiimote library for JAVA.</description>
 	<url>http://motej.sourceforge.net</url>
