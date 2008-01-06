@@ -7,4 +7,4 @@
 
 motej extras
 
- foo bar...
+ The motej extras package will provide additional APIs for e.g. roll and distance calculation based on IR and Accelerometer data provided by <motej library.> 
