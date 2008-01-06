@@ -1,0 +1,26 @@
+ ----
+ Links
+ -----
+ -----
+ 2008-01-03
+ -----
+
+Links
+
+ Resources and other java/wiimote projects.
+
+* wiimote resources
+
+ * {{{http://www.wiili.org}WiiLi}} - a Wiki style wiimote resource.
+ 
+ * {{{http://www.wiibrew.org}WiiBrew Wiki}} - another Wiki style wiimote resource.
+
+* JSR 82 (Bluetooth) implementations
+
+ * {{{http://code.google.com/p/bluecove/}BlueCove}}
+
+* other java/wiimote implementations
+
+ * {{{http://www.wiili.org/index.php/WiiremoteJ}WiiRemoteJ}} - a closed source but feature rich implementation.
+ 
+ * {{{http://wiigee.sourceforge.net/}wiigee}} - open source (GPL) implementation.
