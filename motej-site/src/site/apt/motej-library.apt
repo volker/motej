@@ -7,4 +7,4 @@
 
 motej library
 
- foo bar...
+ The design vision of <motej library> is to provide an lightweight and easy to use API for Wiimote communication. Wiimote data should be provided as unchanged as possible.

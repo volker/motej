@@ -9,6 +9,17 @@ Introduction
 
  motej is a slim Java library for Wiimote communication, licensed under ASL 2.0
 
+ {{{http://en.wikipedia.org/wiki/Wiimote}wikipedia}}:
+  
++--
+The Wii Remote, sometimes nicknamed "Wiimote", is the primary controller
+for Nintendo's Wii console. A main feature of the Wii Remote is its motion
+sensing capability, which allows the user to interact with and manipulate
+items on screen via movement and pointing through the use of accelerometer
+and optical sensor technology. Another feature is its expandability through
+the use of attachments.
++--
+
 * Architecture
 
  <motej> consists of two main packages, the <motej library> and the <motej extras.> While <motej extras> depends on <motej library> and will offer additional functionality, <motej library> provides basic Wiimote access and depends only on a JSR 82 (Bluetooth) implementation and <commons-logging.>
