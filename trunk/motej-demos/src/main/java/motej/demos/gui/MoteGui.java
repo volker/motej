@@ -22,6 +22,7 @@ import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.awt.geom.AffineTransform;
@@ -526,14 +527,12 @@ public class MoteGui {
 		feedbackButtonMinus.setEnabled(false);
 		bottomPanel.add(feedbackButtonMinus);
 		
-		frame.addWindowStateListener(new WindowStateListener() {
+		frame.addWindowListener(new WindowAdapter() {
 		
-			public void windowStateChanged(WindowEvent arg0) {
-				if (arg0.getNewState() == WindowEvent.WINDOW_CLOSED) {
-					if (mote != null) {
-						mote.disconnect();
-					}
-					frame.dispose();
+			@Override
+			public void windowClosed(WindowEvent e) {
+				if (mote != null) {
+					mote.disconnect();
 				}
 			}
 		
