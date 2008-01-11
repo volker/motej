@@ -20,10 +20,10 @@ import java.io.IOException;
 import javax.bluetooth.L2CAPConnection;
 import javax.microedition.io.Connector;
 
+import motej.request.ReportModeRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import motej.request.ReportModeRequest;
 
 /**
  * 
@@ -44,7 +44,7 @@ class IncomingThread extends Thread {
 
 	protected IncomingThread(Mote source, String btaddress)
 			throws IOException, InterruptedException {
-		super("IncomingWiimoteThread:" + btaddress);
+		super("in:" + btaddress);
 		this.source = source;
 		incoming = (L2CAPConnection) Connector.open("btl2cap://" + btaddress
 				+ ":13;authenticate=false;encrypt=false;master=false",
@@ -68,27 +68,21 @@ class IncomingThread extends Thread {
 	protected void parseBasicIrCameraData(byte[] bytes, int offset) {
 		int x0 = bytes[offset] & 0xff ^ (bytes[offset + 2] & 0x30) << 4;
 		int y0 = bytes[offset + 1] & 0xff ^ (bytes[offset + 2] & 0xc0) << 2;
-		if (x0 < 1023 && y0 < 1023) {
-			source.fireIrCameraEvent(IrCameraMode.BASIC, 0, x0, y0, 0);
-		}
+		IrPoint p0 = new IrPoint(x0, y0);
 
 		int x1 = bytes[offset + 3] & 0xff ^ (bytes[offset + 2] & 0x03) << 8;
 		int y1 = bytes[offset + 4] & 0xff ^ (bytes[offset + 2] & 0x0c) << 6;
-		if (x1 < 1023 && y1 < 1023) {
-			source.fireIrCameraEvent(IrCameraMode.BASIC, 1, x1, y1, 0);
-		}
+		IrPoint p1 = new IrPoint(x1, y1);
 
 		int x2 = bytes[offset + 5] & 0xff ^ (bytes[offset + 7] & 0x30) << 4;
 		int y2 = bytes[offset + 6] & 0xff ^ (bytes[offset + 7] & 0xc0) << 2;
-		if (x2 < 1023 && y2 < 1023) {
-			source.fireIrCameraEvent(IrCameraMode.BASIC, 2, x2, y2, 0);
-		}
+		IrPoint p2 = new IrPoint(x2, y2);
 
 		int x3 = bytes[offset + 8] & 0xff ^ (bytes[offset + 7] & 0x03) << 8;
 		int y3 = bytes[offset + 9] & 0xff ^ (bytes[offset + 7] & 0x0c) << 6;
-		if (x3 < 1023 && y3 < 1023) {
-			source.fireIrCameraEvent(IrCameraMode.BASIC, 3, x3, y3, 0);
-		}
+		IrPoint p3 = new IrPoint(x3, y3);
+		
+		source.fireIrCameraEvent(IrCameraMode.BASIC, p0, p1, p2, p3);
 	}
 
 	protected void parseCoreButtonData(byte[] bytes) {
@@ -100,30 +94,24 @@ class IncomingThread extends Thread {
 		int x0 = bytes[7] & 0xff ^ (bytes[9] & 0x30) << 4;
 		int y0 = bytes[8] & 0xff ^ (bytes[9] & 0xc0) << 2;
 		int size0 = bytes[9] & 0x0f;
-		if (x0 < 1023 && y0 < 1023) {
-			source.fireIrCameraEvent(IrCameraMode.EXTENDED, 0, x0, y0, size0);
-		}
+		IrPoint p0 = new IrPoint(x0, y0, size0);
 
 		int x1 = bytes[10] & 0xff ^ (bytes[12] & 0x30) << 4;
 		int y1 = bytes[11] & 0xff ^ (bytes[12] & 0xc0) << 2;
 		int size1 = bytes[12] & 0x0f;
-		if (x1 < 1023 && y1 < 1023) {
-			source.fireIrCameraEvent(IrCameraMode.EXTENDED, 1, x1, y1, size1);
-		}
+		IrPoint p1 = new IrPoint(x1, y1, size1);
 
 		int x2 = bytes[13] & 0xff ^ (bytes[15] & 0x30) << 4;
 		int y2 = bytes[14] & 0xff ^ (bytes[15] & 0xc0) << 2;
 		int size2 = bytes[15] & 0x0f;
-		if (x2 < 1023 && y2 < 1023) {
-			source.fireIrCameraEvent(IrCameraMode.EXTENDED, 2, x2, y2, size2);
-		}
+		IrPoint p2 = new IrPoint(x2, y2, size2);
 
 		int x3 = bytes[16] & 0xff ^ (bytes[18] & 0x30) << 4;
 		int y3 = bytes[17] & 0xff ^ (bytes[18] & 0xc0) << 2;
 		int size3 = bytes[18] & 0x0f;
-		if (x3 < 1023 && y3 < 1023) {
-			source.fireIrCameraEvent(IrCameraMode.EXTENDED, 3, x3, y3, size3);
-		}
+		IrPoint p3 = new IrPoint(x3, y3, size3);
+
+		source.fireIrCameraEvent(IrCameraMode.EXTENDED, p0, p1, p2, p3);
 	}
 
 	protected void parseExtensionData(byte[] bytes, int offset, int length) {

@@ -24,9 +24,6 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -38,6 +35,7 @@ import javax.swing.SwingUtilities;
 
 import motej.IrCameraMode;
 import motej.IrCameraSensitivity;
+import motej.IrPoint;
 import motej.Mote;
 import motej.MoteFinder;
 import motej.event.CoreButtonEvent;
@@ -54,10 +52,7 @@ import motej.request.ReportModeRequest;
 @SuppressWarnings("serial")
 public class MoteGui {
 	
-	private int irx1 = 10, iry1 = 100, size1;
-	private int irx2, iry2, size2;
-	private int irx3, iry3, size3;
-	private int irx4, iry4, size4;
+	private IrPoint p0, p1, p2, p3;
 	
 //	protected class AccelerometerComponent implements GLEventListener {
 //		
@@ -116,24 +111,18 @@ public class MoteGui {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
+
+			if (p0 == null)
+				return;
 			
 			Graphics2D g2 = (Graphics2D) g;
 			Color origColor = g2.getColor();
 			g2.setColor(Color.BLACK);
 
-			AffineTransform trafo = AffineTransform.getScaleInstance(1024 / getWidth(), 768 / getHeight());
-			Point2D dest = trafo.transform(new Point2D.Double(irx1, iry1), null);
-			System.out.println("width: " + getWidth());
-			System.out.println("height: " + getHeight());
-			System.out.println("trafox " + irx1 + " -> " + dest.getX());
-			System.out.println("trafoy " + iry1 + " -> " + dest.getY());
-			g2.drawOval((int)dest.getX(), (int)dest.getY(), (size1 + 1) * 5, (size1 + 1) * 5);
-			trafo.transform(new Point2D.Double(irx2, iry2), dest);
-			g2.drawOval((int)dest.getX(), (int)dest.getY(), (size2 + 1) * 5, (size1 + 1) * 5);
-			trafo.transform(new Point2D.Double(irx3, iry3), dest);
-			g2.drawOval((int)dest.getX(), (int)dest.getY(), (size3 + 1) * 5, (size1 + 1) * 5);
-			trafo.transform(new Point2D.Double(irx4, iry4), dest);
-			g2.drawOval((int)dest.getX(), (int)dest.getY(), (size4 + 1) * 5, (size1 + 1) * 5);
+			g2.drawOval((int) p0.getX(), (int) p0.getY(), p0.getSize() * 5, p0.getSize() * 5);
+			g2.drawOval((int) p1.getX(), (int) p1.getY(), p1.getSize() * 5, p1.getSize() * 5);
+			g2.drawOval((int) p2.getX(), (int) p2.getY(), p2.getSize() * 5, p2.getSize() * 5);
+			g2.drawOval((int) p3.getX(), (int) p3.getY(), p3.getSize() * 5, p3.getSize() * 5);
 			g2.setColor(origColor);
 		}
 		
@@ -194,30 +183,10 @@ public class MoteGui {
 				mote.addIrCameraListener(new IrCameraListener() {
 					
 					public void irImageChanged(IrCameraEvent evt) {
-						switch (evt.getSlot()) {
-						case 0:
-							irx1 = evt.getX();
-							iry1 = evt.getY();
-							size1 = evt.getSize();
-							break;
-						case 1:
-							irx2 = evt.getX();
-							iry2 = evt.getY();
-							size2 = evt.getSize();
-							break;
-						case 2:
-							irx3 = evt.getX();
-							iry3 = evt.getY();
-							size3 = evt.getSize();
-							break;
-						case 3:
-							irx4 = evt.getX();
-							iry4 = evt.getY();
-							size4 = evt.getSize();
-							break;
-						default:
-							System.out.println("unknown camera slot");
-						}
+						p0 = evt.getIrPoint(0);
+						p1 = evt.getIrPoint(1);
+						p2 = evt.getIrPoint(2);
+						p3 = evt.getIrPoint(3);
 						ircomp.repaint();
 					}
 				
