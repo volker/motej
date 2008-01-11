@@ -13,45 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package motej.event;
-
-import motej.IrCameraMode;
-import motej.IrPoint;
-import motej.Mote;
+package motej.request;
 
 /**
  * 
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class IrCameraEvent {
+public class ReadRegisterRequest implements MoteRequest {
 
-	private Mote source;
+	private byte[] offset;
 	
-	private IrCameraMode mode;
-
-	private IrPoint[] points;
+	private byte[] size;
 	
-	public IrCameraEvent(Mote source, IrCameraMode mode, IrPoint p0, IrPoint p1, IrPoint p2, IrPoint p3) {
-		this.source = source;
-		this.mode = mode;
+	public ReadRegisterRequest(byte[] offset, byte[] size) {
+		this.offset = offset;
+		this.size = size;
+	}
+	
+	public byte[] getBytes() {
+		byte[] data = new byte[8];
 		
-		points = new IrPoint[4];
-		points[0] = p0;
-		points[1] = p1;
-		points[2] = p2;
-		points[3] = p3;
+		// HID command
+		data[0] = 0x52;
+		
+		// Output report 0x17
+		data[1] = 0x17;
+		
+		// select control register address space
+		data[2] = 0x04;
+		
+		// offset
+		System.arraycopy(offset, 0, data, 3, 3);
+		
+		// size
+		System.arraycopy(size, 0, data, 6, 2);
+		
+		return data;
 	}
 
-	public Mote getSource() {
-		return source;
-	}
-
-	public IrCameraMode getMode() {
-		return mode;
-	}
-
-	public IrPoint getIrPoint(int slot) {
-		return points[slot];
-	}
 }

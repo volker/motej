@@ -32,7 +32,7 @@ public class IrCameraDemo {
 		IrCameraListener listener = new IrCameraListener() {
 		
 			public void irImageChanged(IrCameraEvent evt) {
-				System.out.println(evt.getX() + " : " + evt.getY());
+				System.out.println(evt.getIrPoint(0).getX() + " : " + evt.getIrPoint(0).getY());
 			}
 		
 		};

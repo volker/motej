@@ -50,7 +50,7 @@ class OutgoingThread extends Thread {
 		private long rumbleMillis = Long.MIN_VALUE;
 
 		protected OutgoingThread(String btaddress) throws IOException, InterruptedException {
-			super("OutgoingWiimoteThread:" + btaddress);
+			super("out:" + btaddress);
 			outgoing = (L2CAPConnection) Connector.open("btl2cap://"
 					+ btaddress
 					+ ":11;authenticate=false;encrypt=false;master=false",

@@ -18,9 +18,6 @@ package motej;
 import javax.bluetooth.RemoteDevice;
 import javax.swing.event.EventListenerList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import motej.event.AccelerometerEvent;
 import motej.event.AccelerometerListener;
 import motej.event.CoreButtonEvent;
@@ -38,6 +35,9 @@ import motej.request.RumbleRequest;
 import motej.request.StatusInformationRequest;
 import motej.request.WriteRegisterRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * 
  * <p>
@@ -50,6 +50,8 @@ public class Mote {
 	private OutgoingThread outgoing;
 
 	private IncomingThread incoming;
+	
+//	private ExtensionProvider extensionProvider;
 
 	private StatusInformationReport statusInformationReport;
 
@@ -176,9 +178,9 @@ public class Mote {
 		}
 	}
 
-	protected void fireIrCameraEvent(IrCameraMode mode, int camera, int x, int y, int size) {
+	protected void fireIrCameraEvent(IrCameraMode mode, IrPoint p0, IrPoint p1, IrPoint p2, IrPoint p3) {
 		IrCameraListener[] listeners = listenerList.getListeners(IrCameraListener.class);
-		IrCameraEvent evt = new IrCameraEvent(this, mode, camera, x, y, size);
+		IrCameraEvent evt = new IrCameraEvent(this, mode, p0, p1, p2, p3);
 		for (IrCameraListener l : listeners) {
 			l.irImageChanged(evt);
 		}
@@ -200,11 +202,27 @@ public class Mote {
 	}
 
 	protected void fireStatusInformationChangedEvent(StatusInformationReport report) {
-		this.statusInformationReport = report;
+//		boolean extensionChanged = statusInformationReport.isExtensionControllerConnected()
+//			!= report.isExtensionControllerConnected();
+		
+		statusInformationReport = report;
 		StatusInformationListener[] listeners = listenerList.getListeners(StatusInformationListener.class);
 		for (StatusInformationListener l : listeners) {
 			l.statusInformationReceived(report);
 		}
+		
+//		if (extensionChanged) {
+//			if (!report.isExtensionControllerConnected()) {
+//				// send disconnect event
+//			} else {
+//				// read extension ID bytes from wii register (0xa400fe)
+//				outgoing.sendRequest(new ReadRegisterRequest(new byte[] { (byte) 0xa4, 0x00, (byte) 0xfe }, new byte[] { 0x02 }));
+//
+//				// TODO this has to be taken care of in the fireReadDataEvent or similar
+//				// query provider for extension
+//				// send connection event
+//			}
+//		}
 	}
 
 	public String getBluetoothAddress() {
