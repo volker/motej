@@ -66,41 +66,66 @@ public class MoteFinder {
 	private DiscoveryAgent discoveryAgent;
 
 	protected final DiscoveryListener listener = new DiscoveryListener() {
-
-		public void deviceDiscovered(RemoteDevice device, DeviceClass clazz) {
-			try {
-				if (log.isInfoEnabled()) {
-					log.info("found device: "
-							+ device.getFriendlyName(true) + " - "
-							+ device.getBluetoothAddress() + " - "
+		
+		public void deviceDiscovered(final RemoteDevice device, DeviceClass clazz) {
+			if (log.isInfoEnabled()) {
+				try {
+					log.info("found device: " + device.getFriendlyName(true)
+							+ " - " + device.getBluetoothAddress() + " - "
 							+ clazz.getMajorDeviceClass() + ":"
 							+ clazz.getMinorDeviceClass() + " - "
 							+ clazz.getServiceClasses());
+				} catch (IOException ex) {
+					log.error(ex.getMessage(), ex);
+					throw new RuntimeException(ex.fillInStackTrace());
 				}
+			}
 
-				if (clazz.getMajorDeviceClass() == 1280 &&
-						clazz.getMinorDeviceClass() == 4 &&
-						device.getFriendlyName(true).startsWith("Nintendo")) {
-					if (advancedDiscovery) {
+			try {
+				if (device.getFriendlyName(true).compareTo("Nintendo RVL-CNT-01") != 0) {
+					return;
+				}
+			} catch (IOException ex) {
+				log.error(ex.getMessage(), ex);
+				throw new RuntimeException(ex);
+			}
+
+			final boolean advanced = advancedDiscovery;
+			Thread connectMote = new Thread(new Runnable() {
+
+				public void run() {
+					if (advanced) {
 						Mote mote = new Mote(device);
 						fireMoteFound(mote);
 					} else {
 						mote = new Mote(device);
-						discoveryAgent.cancelInquiry(this);
+						synchronized (inquiryCompletedEvent) {
+							inquiryCompletedEvent.notifyAll();
+						}
+						// discoveryAgent.cancelInquiry(listener);
 					}
 				}
-			} catch (IOException ex) {
-				throw new RuntimeException(ex.fillInStackTrace());
-			}
+
+			}, "ConnectThread");
+			connectMote.start();
 		}
 
 		public void inquiryCompleted(int discType) {
+			if (discType == DiscoveryListener.INQUIRY_COMPLETED) {
+				if (log.isInfoEnabled()) {
+					log.info("inquiry completed");
+				}
+			}
+
 			if (discType == DiscoveryListener.INQUIRY_TERMINATED) {
 				if (log.isInfoEnabled()) {
-					log.info("inquiry completed: " + discType);
+					log.info("inquiry terminated");
 				}
-				synchronized (inquiryCompletedEvent) {
-					inquiryCompletedEvent.notifyAll();
+			}
+			
+			if (discType == DiscoveryListener.INQUIRY_ERROR) {
+				if (log.isInfoEnabled()) {
+					log.info("inquiry error");
 				}
 			}
 		}
@@ -136,7 +161,7 @@ public class MoteFinder {
 				}
 				inquiryCompletedEvent.wait();
 				if (log.isInfoEnabled()) {
-					log.info("found " + mote == null ? 0 : 1 + " motes.");
+					log.info("found " + mote == null ? 0 : 1 + " mote.");
 				}
 			}
 			return mote;

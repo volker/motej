@@ -24,12 +24,15 @@ import motej.event.CoreButtonEvent;
 import motej.event.CoreButtonListener;
 import motej.event.DataEvent;
 import motej.event.DataListener;
+import motej.event.ExtensionEvent;
+import motej.event.ExtensionListener;
 import motej.event.IrCameraEvent;
 import motej.event.IrCameraListener;
 import motej.event.StatusInformationListener;
 import motej.request.CalibrationDataRequest;
 import motej.request.PlayerLedRequest;
 import motej.request.RawByteRequest;
+import motej.request.ReadRegisterRequest;
 import motej.request.ReportModeRequest;
 import motej.request.RumbleRequest;
 import motej.request.StatusInformationRequest;
@@ -51,7 +54,9 @@ public class Mote {
 
 	private IncomingThread incoming;
 	
-//	private ExtensionProvider extensionProvider;
+	private ExtensionProvider extensionProvider = new ExtensionProvider();
+	
+	private Extension currentExtension;
 
 	private StatusInformationReport statusInformationReport;
 
@@ -78,7 +83,7 @@ public class Mote {
 		}
 	}
 
-	public void addAccelerometerListener(AccelerometerListener listener) {
+	public void addAccelerometerListener(AccelerometerListener<Mote> listener) {
 		listenerList.add(AccelerometerListener.class, listener);
 	}
 
@@ -88,6 +93,10 @@ public class Mote {
 
 	public void addDataListener(DataListener listener) {
 		listenerList.add(DataListener.class, listener);
+	}
+	
+	public void addExtensionListener(ExtensionListener listener) {
+		listenerList.add(ExtensionListener.class, listener);
 	}
 
 	public void addIrCameraListener(IrCameraListener listener) {
@@ -107,7 +116,9 @@ public class Mote {
 	}
 
 	public void disconnect() {
-		log.info("Disconnecting Mote " + bluetoothAddress);
+		if (log.isInfoEnabled()) {
+			log.info("Disconnecting mote " + bluetoothAddress);
+		}
 		if (outgoing != null) {
 			outgoing.disconnect();
 			try {
@@ -126,6 +137,9 @@ public class Mote {
 		}
 	}
 
+	/**
+	 * Enables the IR Camera in basic mode with Marcan sensitivity.
+	 */
 	public void enableIrCamera() {
 		enableIrCamera(IrCameraMode.BASIC, IrCameraSensitivity.MARCAN);
 	}
@@ -162,10 +176,11 @@ public class Mote {
 		return hashCode() == obj.hashCode();
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void fireAccelerometerEvent(int x, int y, int z) {
-		AccelerometerListener[] listeners = listenerList.getListeners(AccelerometerListener.class);
-		AccelerometerEvent evt = new AccelerometerEvent(this, x, y, z);
-		for (AccelerometerListener l : listeners) {
+		AccelerometerListener<Mote>[] listeners = listenerList.getListeners(AccelerometerListener.class);
+		AccelerometerEvent<Mote> evt = new AccelerometerEvent<Mote>(this, x, y, z);
+		for (AccelerometerListener<Mote> l : listeners) {
 			l.accelerometerChanged(evt);
 		}
 	}
@@ -175,6 +190,22 @@ public class Mote {
 		CoreButtonEvent evt = new CoreButtonEvent(this, modifiers);
 		for (CoreButtonListener l : listeners) {
 			l.buttonPressed(evt);
+		}
+	}
+	
+	protected void fireExtensionConnectedEvent() {
+		ExtensionListener[] listeners = listenerList.getListeners(ExtensionListener.class);
+		ExtensionEvent evt = new ExtensionEvent(this, currentExtension);
+		for (ExtensionListener l : listeners) {
+			l.extensionConnected(evt);
+		}
+	}
+	
+	protected void fireExtensionDisconnectedEvent() {
+		ExtensionListener[] listeners = listenerList.getListeners(ExtensionListener.class);
+		ExtensionEvent evt = new ExtensionEvent(this);
+		for (ExtensionListener l : listeners) {
+			l.extensionDisconnected(evt);
 		}
 	}
 
@@ -188,22 +219,58 @@ public class Mote {
 
 	protected void fireReadDataEvent(byte[] address, byte[] payload, int error) {
 		if (calibrationDataReport == null && error == 0 && address[0] == 0x00 && address[1] == 0x20) {
-			// calibration data (most probably), if thats the first time, it's probably for us - so we'll consume this event.
-			CalibrationDataReport report = new CalibrationDataReport(payload[0], payload[1], payload[2],
-					payload[4], payload[5], payload[6]);
-			calibrationDataReport = report;
-		} else {
-			DataListener[] listeners = listenerList.getListeners(DataListener.class);
-			DataEvent evt = new DataEvent(address, payload, error);
-			for (DataListener l : listeners) {
-				l.dataRead(evt);
+			// calibration data (most probably)
+			if (log.isDebugEnabled()) {
+				log.debug("Received Calibration Data Report.");
 			}
+			CalibrationDataReport report = new CalibrationDataReport(payload[0] & 0xff, payload[1] & 0xff, payload[2] & 0xff,
+					payload[4] & 0xff, payload[5] & 0xff, payload[6] & 0xff);
+			calibrationDataReport = report;
+		}
+		
+		if (currentExtension == null && error == 0 && address[0] == 0x00 && (address[1] & 0xff) == 0xfe && payload.length == 2) {
+			// extension ID (most probably)
+			if (log.isDebugEnabled()) {
+				String id0 = Integer.toHexString(payload[0] & 0xff);
+				String id1 = Integer.toHexString(payload[1] & 0xff);
+				log.debug("Received Extension ID: " + (id0.length() == 1 ? "0x0" + id0 : "0x" + id0) + " " + (id1.length() == 1 ? "0x0" + id1 : "0x" + id1));
+			}
+			
+			if ((payload[0] & 0xff) == 0xff
+					&& (payload[1] & 0xff) == 0xff) {
+				log.debug("Connection not completed, re-requesting extension id.");
+				outgoing.sendRequest(new ReadRegisterRequest(new byte[] { (byte) 0xa4, 0x00, (byte) 0xfe }, new byte[] { 0x00, 0x02 }));
+			} else {
+			
+				currentExtension = extensionProvider.getExtension(payload);
+				if (log.isInfoEnabled()) {
+					log.info("Found extension: " + currentExtension == null ? "null" : currentExtension.toString());
+				}
+				if (currentExtension != null) {
+					currentExtension.setMote(this);
+					currentExtension.initialize();
+					incoming.setExtension(currentExtension);
+					fireExtensionConnectedEvent();
+				}
+			}
+		}
+		
+		DataListener[] listeners = listenerList.getListeners(DataListener.class);
+		DataEvent evt = new DataEvent(address, payload, error);
+		for (DataListener l : listeners) {
+			l.dataRead(evt);
 		}
 	}
 
 	protected void fireStatusInformationChangedEvent(StatusInformationReport report) {
-//		boolean extensionChanged = statusInformationReport.isExtensionControllerConnected()
-//			!= report.isExtensionControllerConnected();
+
+		// decide if we should query the extension port
+		boolean extensionChanged;
+		if (statusInformationReport == null) {
+			extensionChanged = report.isExtensionControllerConnected();
+		} else {
+			extensionChanged = statusInformationReport.isExtensionControllerConnected() != report.isExtensionControllerConnected();
+		}
 		
 		statusInformationReport = report;
 		StatusInformationListener[] listeners = listenerList.getListeners(StatusInformationListener.class);
@@ -211,18 +278,18 @@ public class Mote {
 			l.statusInformationReceived(report);
 		}
 		
-//		if (extensionChanged) {
-//			if (!report.isExtensionControllerConnected()) {
-//				// send disconnect event
-//			} else {
-//				// read extension ID bytes from wii register (0xa400fe)
-//				outgoing.sendRequest(new ReadRegisterRequest(new byte[] { (byte) 0xa4, 0x00, (byte) 0xfe }, new byte[] { 0x02 }));
-//
-//				// TODO this has to be taken care of in the fireReadDataEvent or similar
-//				// query provider for extension
-//				// send connection event
-//			}
-//		}
+		if (extensionChanged) {
+			if (!report.isExtensionControllerConnected()) {
+				currentExtension = null;
+				fireExtensionDisconnectedEvent();
+			} else {
+				// 1. initialize peripheral (writing zero to 0xa40040) 
+				outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xa4, 0x00, 0x40 }, new byte[] { 0x00 }));
+				
+				// 2. read extension ID bytes from wii register (0xa400fe)
+				outgoing.sendRequest(new ReadRegisterRequest(new byte[] { (byte) 0xa4, 0x00, (byte) 0xfe }, new byte[] { 0x00, 0x02 }));
+			}
+		}
 	}
 
 	public String getBluetoothAddress() {
@@ -242,7 +309,7 @@ public class Mote {
 		return bluetoothAddress.hashCode();
 	}
 
-	public void removeAccelerometerListener(AccelerometerListener listener) {
+	public void removeAccelerometerListener(AccelerometerListener<Mote> listener) {
 		listenerList.remove(AccelerometerListener.class, listener);
 	}
 
@@ -252,6 +319,10 @@ public class Mote {
 
 	public void removeDataListener(DataListener listener) {
 		listenerList.remove(DataListener.class, listener);
+	}
+	
+	public void removeExtensionListener(ExtensionListener listener) {
+		listenerList.remove(ExtensionListener.class, listener);
 	}
 
 	public void removeIrCameraListener(IrCameraListener listener) {
@@ -280,5 +351,14 @@ public class Mote {
 
 	public void setReportMode(byte mode, boolean continuous) {
 		outgoing.sendRequest(new ReportModeRequest(mode, continuous));
+	}
+	
+	public void readRegisters(byte[] offset, byte[] size) {
+		outgoing.sendRequest(new ReadRegisterRequest(offset, size));
+	}
+	
+	@Override
+	public String toString() {
+		return "Mote[" + bluetoothAddress + "]";
 	}
 }

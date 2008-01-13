@@ -22,8 +22,8 @@ import java.util.EventListener;
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public interface AccelerometerListener extends EventListener {
+public interface AccelerometerListener<T> extends EventListener {
 
-	public void accelerometerChanged(AccelerometerEvent evt);
+	public void accelerometerChanged(AccelerometerEvent<T> evt);
 
 }
