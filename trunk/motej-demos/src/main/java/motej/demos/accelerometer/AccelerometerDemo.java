@@ -29,9 +29,9 @@ import motej.request.ReportModeRequest;
 public class AccelerometerDemo {
 
 	public static void main(String[] args) throws InterruptedException {
-		AccelerometerListener listener = new AccelerometerListener() {
+		AccelerometerListener<Mote> listener = new AccelerometerListener<Mote>() {
 		
-			public void accelerometerChanged(AccelerometerEvent evt) {
+			public void accelerometerChanged(AccelerometerEvent<Mote> evt) {
 				System.out.println(evt.getX() + " : " + evt.getY() + " : " + evt.getZ());
 			}
 		

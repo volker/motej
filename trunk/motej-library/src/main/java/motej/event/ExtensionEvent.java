@@ -15,43 +15,38 @@
  */
 package motej.event;
 
+import motej.Extension;
+import motej.Mote;
 
 /**
  * 
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class AccelerometerEvent<T> {
+public class ExtensionEvent {
 
-	private int x;
+	private Mote source;
 	
-	private int y;
+	private Extension extension;
 	
-	private int z;
+	public ExtensionEvent(Mote source) {
+		this(source, null);
+	}
 	
-	private T source;
-	
-	public AccelerometerEvent(T source, int x, int y, int z) {
+	public ExtensionEvent(Mote source, Extension extension) {
 		this.source = source;
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.extension = extension;
 	}
 
-	public int getX() {
-		return x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public int getZ() {
-		return z;
-	}
-
-	public T getSource() {
+	public Mote getSource() {
 		return source;
 	}
 
+	public Extension getExtension() {
+		return extension;
+	}
+	
+	public boolean isExtensionConnected() {
+		return extension != null;
+	}
 }

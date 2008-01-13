@@ -13,45 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package motej.event;
-
+package motej;
 
 /**
  * 
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class AccelerometerEvent<T> {
+public abstract class AbstractExtension implements Extension {
 
-	private int x;
-	
-	private int y;
-	
-	private int z;
-	
-	private T source;
-	
-	public AccelerometerEvent(T source, int x, int y, int z) {
-		this.source = source;
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public int getZ() {
-		return z;
-	}
-
-	public T getSource() {
-		return source;
+	protected void decrypt(byte[] data) {
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (byte) (((byte) data[i] ^ (byte) 0x17) + (byte) 0x17);
+		}
 	}
 
 }

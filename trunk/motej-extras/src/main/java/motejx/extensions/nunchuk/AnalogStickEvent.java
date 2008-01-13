@@ -13,45 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package motej.event;
+package motejx.extensions.nunchuk;
 
+import java.awt.Point;
 
 /**
  * 
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class AccelerometerEvent<T> {
+public class AnalogStickEvent {
 
-	private int x;
+	private Point point;
 	
-	private int y;
+	private Object source;
 	
-	private int z;
-	
-	private T source;
-	
-	public AccelerometerEvent(T source, int x, int y, int z) {
+	public AnalogStickEvent(Object source, Point point) {
 		this.source = source;
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.point = point;
 	}
 
-	public int getX() {
-		return x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public int getZ() {
-		return z;
-	}
-
-	public T getSource() {
+	public Object getSource() {
 		return source;
+	}
+
+	public Point getPoint() {
+		return point;
 	}
 
 }

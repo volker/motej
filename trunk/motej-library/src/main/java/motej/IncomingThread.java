@@ -37,6 +37,8 @@ class IncomingThread extends Thread {
 	private Log log = LogFactory.getLog(IncomingThread.class);
 
 	private Mote source;
+	
+	private Extension extension;
 
 	private volatile boolean active;
 
@@ -46,10 +48,20 @@ class IncomingThread extends Thread {
 			throws IOException, InterruptedException {
 		super("in:" + btaddress);
 		this.source = source;
-		incoming = (L2CAPConnection) Connector.open("btl2cap://" + btaddress
-				+ ":13;authenticate=false;encrypt=false;master=false",
-				Connector.READ);
+		
+		String l2cap = "btl2cap://" + btaddress
+		+ ":13;authenticate=false;encrypt=false;master=false";
+		
+		if (log.isDebugEnabled()) {
+			log.debug("Opening incoming connection: " + l2cap);
+		}
+		
+		incoming = (L2CAPConnection) Connector.open(l2cap, Connector.READ, true);
 
+		if (log.isDebugEnabled()) {
+			log.debug("Incoming connection is " + incoming.toString());
+		}
+		
 		Thread.sleep(THREAD_SLEEP);
 		active = true;
 	}
@@ -115,7 +127,12 @@ class IncomingThread extends Thread {
 	}
 
 	protected void parseExtensionData(byte[] bytes, int offset, int length) {
-		log.error("extension data handling not implemented yet.");
+		if (extension == null) {
+			return;
+		}
+		byte[] extensionData = new byte[length];
+		System.arraycopy(bytes, offset, extensionData, 0, length);
+		extension.parseExtensionData(extensionData);
 	}
 
 	protected void parseFullIrCameraData(byte[] bytes, int offset) {
@@ -131,7 +148,7 @@ class IncomingThread extends Thread {
 	}
 
 	protected void parseMemoryData(byte[] bytes) {
-		int size = (bytes[4] >> 4) & 0x0f;
+		int size = ((bytes[4] >> 4) & 0x0f) + 1;
 		int error = bytes[4] & 0x0f;
 		byte[] address = new byte[] { bytes[5], bytes[6] };
 		byte[] payload = new byte[size];
@@ -159,23 +176,23 @@ class IncomingThread extends Thread {
 			try {
 				byte[] buf = new byte[23];
 				incoming.receive(buf);
-
-//				 System.out.println("received: ");
-//				 for (int i = 0; i < buf.length; i++) {
-//				 System.out.print((int) buf[i] + " ");
-//				 }
-//				 System.out.println();
-//								
-//				 System.out.println("as bitset: ");
-//				 for (int i = 0; i < buf.length; i++) {
-//				 for (int j = 7; j >= 0; j--) {
-//				 System.out.print((buf[i] & (1 << j)) == (1 << j) ? "1" :
-//				 "0");
-//				 }
-//				 System.out.print(" ");
-//				 }
-//				 System.out.println();
-
+				
+				if (log.isTraceEnabled()) {
+					StringBuffer sb = new StringBuffer();
+					log.trace("received:");
+					for (int i = 0; i < 23; i++) {
+						String hex = Integer.toHexString(buf[i] & 0xff);
+						sb.append(hex.length() == 1 ? "0x0" : "0x").append(hex).append(" ");
+						if ((i + 1) % 8 == 0) {
+							log.trace(sb.toString());
+							sb.delete(0, sb.length());
+						}
+					}
+					if (sb.length() > 0) {
+						log.trace(sb.toString());
+					}
+				}
+				
 				switch (buf[1]) {
 				case ReportModeRequest.DATA_REPORT_0x20:
 					parseStatusInformation(buf);
@@ -197,7 +214,7 @@ class IncomingThread extends Thread {
 
 				case ReportModeRequest.DATA_REPORT_0x32:
 					parseCoreButtonData(buf);
-					parseExtensionData(buf, 3, 8);
+					parseExtensionData(buf, 4, 8);
 					break;
 
 				case ReportModeRequest.DATA_REPORT_0x33:
@@ -208,7 +225,7 @@ class IncomingThread extends Thread {
 
 				case ReportModeRequest.DATA_REPORT_0x34:
 					parseCoreButtonData(buf);
-					parseExtensionData(buf, 3, 19);
+					parseExtensionData(buf, 4, 19);
 					break;
 
 				case ReportModeRequest.DATA_REPORT_0x35:
@@ -243,7 +260,10 @@ class IncomingThread extends Thread {
 					break;
 
 				default:
-					log.info("unknown or not yet implemented data report: " + buf[1]);
+					if (log.isDebugEnabled()) {
+						String hex = Integer.toHexString(buf[1] & 0xff);
+						log.debug("Unknown or not yet implemented data report: " + (hex.length() == 1 ? "0x0" + hex : "0x" + hex));
+					}
 				}
 
 				Thread.sleep(THREAD_SLEEP);
@@ -259,5 +279,9 @@ class IncomingThread extends Thread {
 		} catch (IOException ex) {
 			log.error(ex);
 		}
+	}
+
+	public void setExtension(Extension extension) {
+		this.extension = extension;
 	}
 }

@@ -24,20 +24,20 @@ package motej;
  */
 public class CalibrationDataReport {
 
-	private byte zeroX;
+	private int zeroX;
 
-	private byte zeroY;
+	private int zeroY;
 
-	private byte zeroZ;
+	private int zeroZ;
 
-	private byte gravityX;
+	private int gravityX;
 
-	private byte gravityY;
+	private int gravityY;
 
-	private byte gravityZ;
+	private int gravityZ;
 
-	public CalibrationDataReport(byte zeroX, byte zeroY, byte zeroZ,
-			byte gravityX, byte gravityY, byte gravityZ) {
+	public CalibrationDataReport(int zeroX, int zeroY, int zeroZ,
+			int gravityX, int gravityY, int gravityZ) {
 		this.zeroX = zeroX;
 		this.zeroY = zeroY;
 		this.zeroZ = zeroZ;
@@ -51,7 +51,7 @@ public class CalibrationDataReport {
 	 * 
 	 * @return the force of gravity X axis
 	 */
-	public byte getGravityX() {
+	public int getGravityX() {
 		return gravityX;
 	}
 
@@ -60,7 +60,7 @@ public class CalibrationDataReport {
 	 * 
 	 * @return the force of gravity Y axis
 	 */
-	public byte getGravityY() {
+	public int getGravityY() {
 		return gravityY;
 	}
 
@@ -69,7 +69,7 @@ public class CalibrationDataReport {
 	 * 
 	 * @return the force of gravity Z axis
 	 */
-	public byte getGravityZ() {
+	public int getGravityZ() {
 		return gravityZ;
 	}
 
@@ -78,7 +78,7 @@ public class CalibrationDataReport {
 	 * 
 	 * @return zero offset X axis
 	 */
-	public byte getZeroX() {
+	public int getZeroX() {
 		return zeroX;
 	}
 
@@ -87,7 +87,7 @@ public class CalibrationDataReport {
 	 * 
 	 * @return zero offset Y axis
 	 */
-	public byte getZeroY() {
+	public int getZeroY() {
 		return zeroY;
 	}
 
@@ -96,7 +96,7 @@ public class CalibrationDataReport {
 	 * 
 	 * @return zero offset Z axis
 	 */
-	public byte getZeroZ() {
+	public int getZeroZ() {
 		return zeroZ;
 	}
 

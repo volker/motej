@@ -13,45 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package motej.event;
-
+package motej;
 
 /**
  * 
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class AccelerometerEvent<T> {
-
-	private int x;
+public interface Extension {
 	
-	private int y;
+	public void initialize();
 	
-	private int z;
+	public void parseExtensionData(byte[] extensionData);
 	
-	private T source;
+	public void setMote(Mote mote);
 	
-	public AccelerometerEvent(T source, int x, int y, int z) {
-		this.source = source;
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public int getZ() {
-		return z;
-	}
-
-	public T getSource() {
-		return source;
-	}
-
 }

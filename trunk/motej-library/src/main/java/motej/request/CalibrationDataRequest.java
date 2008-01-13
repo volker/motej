@@ -23,6 +23,6 @@ package motej.request;
 public class CalibrationDataRequest extends ReadMemoryRequest {
 
 	public CalibrationDataRequest() {
-		super(new byte[] { 0x00, 0x00, 0x20 }, new byte[] { 0x00, 0xa });
+		super(new byte[] { 0x00, 0x00, 0x20 }, new byte[] { 0x00, 0x0a });
 	}
 }

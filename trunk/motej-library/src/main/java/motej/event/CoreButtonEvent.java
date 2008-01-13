@@ -55,7 +55,6 @@ public class CoreButtonEvent {
 	public CoreButtonEvent(Mote source, int modifiers) {
 		this.source = source;
 		this.modifiers = modifiers;
-//		System.out.println("modifiers: " + modifiers);
 	}
 
 	public int getButton() {

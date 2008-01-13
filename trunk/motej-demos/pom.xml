@@ -21,6 +21,10 @@
 			<groupId>motej</groupId>
 			<artifactId>motej-library</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>motej</groupId>
+			<artifactId>motej-extras</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

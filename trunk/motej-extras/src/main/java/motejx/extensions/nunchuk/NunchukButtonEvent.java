@@ -13,45 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package motej.event;
-
+package motejx.extensions.nunchuk;
 
 /**
  * 
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class AccelerometerEvent<T> {
+public class NunchukButtonEvent {
 
-	private int x;
+	public static final int NO_BUTTON = 1;
 	
-	private int y;
+	public static final int BUTTON_C = 0x02;
 	
-	private int z;
+	public static final int BUTTON_Z = 0x01;
 	
-	private T source;
+	private int modifiers;
 	
-	public AccelerometerEvent(T source, int x, int y, int z) {
+	private Nunchuk source;
+	
+	public NunchukButtonEvent(Nunchuk source, int modifiers) {
 		this.source = source;
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.modifiers = modifiers;
 	}
-
-	public int getX() {
-		return x;
+	
+	public int getButton() {
+		return modifiers;
 	}
-
-	public int getY() {
-		return y;
-	}
-
-	public int getZ() {
-		return z;
-	}
-
-	public T getSource() {
+	
+	public Nunchuk getSource() {
 		return source;
 	}
-
+	
+	public boolean isButtonCPressed() {
+		return (BUTTON_C & modifiers) == BUTTON_C;
+	}
+	
+	public boolean isButtonZPressed() {
+		return (BUTTON_Z & modifiers) == BUTTON_Z;
+	}
+	
+	public boolean isNoButtonPressed() {
+		return modifiers == NO_BUTTON;
+	}
 }
