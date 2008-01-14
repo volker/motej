@@ -43,6 +43,12 @@ public class ExtensionProvider {
 				lookup = new HashMap<String, Class<? extends Extension>>();
 				InputStream in = ExtensionProvider.class.getResourceAsStream("/motejx/extensions/extensions.properties");
 				Properties props = new Properties();
+				
+				if (in == null) {
+					log.info("no extensions.properties found. as a result, no extensions will be available.");
+					return;
+				}
+				
 				try {
 					props.load(in);
 					for (Object o : props.keySet()) {
