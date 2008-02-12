@@ -15,7 +15,6 @@
  */
 package motej;
 
-import javax.bluetooth.RemoteDevice;
 import javax.swing.event.EventListenerList;
 
 import motej.event.AccelerometerEvent;
@@ -28,6 +27,8 @@ import motej.event.ExtensionEvent;
 import motej.event.ExtensionListener;
 import motej.event.IrCameraEvent;
 import motej.event.IrCameraListener;
+import motej.event.MoteDisconnectedEvent;
+import motej.event.MoteDisconnectedListener;
 import motej.event.StatusInformationListener;
 import motej.request.CalibrationDataRequest;
 import motej.request.PlayerLedRequest;
@@ -38,8 +39,8 @@ import motej.request.RumbleRequest;
 import motej.request.StatusInformationRequest;
 import motej.request.WriteRegisterRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -48,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class Mote {
 	
-	private Log log = LogFactory.getLog(Mote.class);
+	private Logger log = LoggerFactory.getLogger(Mote.class);
 
 	private OutgoingThread outgoing;
 
@@ -66,12 +67,21 @@ public class Mote {
 
 	private String bluetoothAddress;
 
-	public Mote(RemoteDevice device) {
+	public Mote(String bluetoothAddress) {
 		try {
-			bluetoothAddress = device.getBluetoothAddress();
+			this.bluetoothAddress = bluetoothAddress;
 			
-			outgoing = new OutgoingThread(device.getBluetoothAddress());
-			incoming = new IncomingThread(this, device.getBluetoothAddress());
+			// I'm interested if one of the Thread is disconnected
+			addMoteDisconnectedListener(new MoteDisconnectedListener<Mote>(){
+				public void moteDisconnected(MoteDisconnectedEvent<Mote> evt) {
+					// Something goes wrong with one of my Thread
+					// Try to properly cleanup everything
+					disconnect();
+				}
+			});
+			
+			outgoing = new OutgoingThread(this, bluetoothAddress);
+			incoming = new IncomingThread(this, bluetoothAddress);
 			
 			incoming.start();
 			outgoing.start();
@@ -103,6 +113,10 @@ public class Mote {
 		listenerList.add(IrCameraListener.class, listener);
 	}
 
+	public void addMoteDisconnectedListener(MoteDisconnectedListener<Mote> listener) {
+		listenerList.add(MoteDisconnectedListener.class, listener);
+	}
+
 	public void addStatusInformationListener(StatusInformationListener listener) {
 		listenerList.add(StatusInformationListener.class, listener);
 	}
@@ -123,16 +137,16 @@ public class Mote {
 			outgoing.disconnect();
 			try {
 				outgoing.join(5000l);
-			} catch (InterruptedException e) {
-				log.error(e);
+			} catch (InterruptedException ex) {
+				log.error(ex.getMessage(), ex);
 			}
 		}
 		if (incoming != null) {
 			incoming.disconnect();
 			try {
 				incoming.join(5000l);
-			} catch (InterruptedException e) {
-				log.error(e);
+			} catch (InterruptedException ex) {
+				log.error(ex.getMessage(), ex);
 			}
 		}
 	}
@@ -174,6 +188,15 @@ public class Mote {
 			return false;
 
 		return hashCode() == obj.hashCode();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void fireMoteDisconnectedEvent() {
+		MoteDisconnectedListener<Mote>[] listeners = listenerList.getListeners(MoteDisconnectedListener.class);
+		MoteDisconnectedEvent<Mote> evt = new MoteDisconnectedEvent<Mote>(this);
+		for (MoteDisconnectedListener<Mote> l : listeners) {
+			l.moteDisconnected(evt);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -327,6 +350,10 @@ public class Mote {
 
 	public void removeIrCameraListener(IrCameraListener listener) {
 		listenerList.remove(IrCameraListener.class, listener);
+	}
+
+	public void remoteMoteDisconnectedListener(MoteDisconnectedListener<Mote> listener) {
+		listenerList.remove(MoteDisconnectedListener.class, listener);
 	}
 
 	public void removeStatusInformationListener(StatusInformationListener listener) {

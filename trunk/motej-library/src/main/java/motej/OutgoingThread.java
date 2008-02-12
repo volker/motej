@@ -25,8 +25,8 @@ import motej.request.MoteRequest;
 import motej.request.PlayerLedRequest;
 import motej.request.RumbleRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -37,7 +37,7 @@ class OutgoingThread extends Thread {
 
 		private static final long THREAD_SLEEP = 10l;
 		
-		private Log log = LogFactory.getLog(OutgoingThread.class);
+		private Logger log = LoggerFactory.getLogger(OutgoingThread.class);
 
 		private volatile boolean active;
 
@@ -49,9 +49,13 @@ class OutgoingThread extends Thread {
 		
 		private long rumbleMillis = Long.MIN_VALUE;
 
-		protected OutgoingThread(String btaddress) throws IOException, InterruptedException {
+		private Mote source;
+
+		protected OutgoingThread(Mote source, String btaddress) throws IOException, InterruptedException {
 			super("out:" + btaddress);
-			
+
+			this.source = source;
+
 			String l2cap = "btl2cap://"
 				+ btaddress
 				+ ":11;authenticate=false;encrypt=false;master=false";
@@ -87,7 +91,7 @@ class OutgoingThread extends Thread {
 						Thread.sleep(THREAD_SLEEP);
 						continue;
 					}
-					if (requestQueue.peek() != null) {
+					if (!requestQueue.isEmpty()) {
 						MoteRequest request = requestQueue.poll();
 						if (request instanceof PlayerLedRequest) {
 							ledByte = ((PlayerLedRequest) request).getLedByte();
@@ -120,14 +124,15 @@ class OutgoingThread extends Thread {
 				} catch (InterruptedException ex) {
 					ex.printStackTrace();
 				} catch (IOException ex) {
-					System.out.println("connection closed?");
+					log.error("connection closed?", ex);
 					active = false;
+					source.fireMoteDisconnectedEvent();
 				}
 			}
 			try {
 				outgoing.close();
 			} catch (IOException ex) {
-				log.error(ex);
+				log.error(ex.getMessage(), ex);
 			}
 		}
 

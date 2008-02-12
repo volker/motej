@@ -16,9 +16,12 @@
 package motej.demos.buttons;
 
 import motej.Mote;
-import motej.MoteFinder;
+import motej.demos.common.SimpleMoteFinder;
 import motej.event.CoreButtonEvent;
 import motej.event.CoreButtonListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -26,11 +29,12 @@ import motej.event.CoreButtonListener;
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
 public class ButtonsDemo {
+	
+	private static Logger log = LoggerFactory.getLogger(ButtonsDemo.class);
 
 	public static void main(String[] args) {
-		System.out.println("press 'q' to quit.");
-		
-		Mote mote = MoteFinder.getMoteFinder().findMote();
+		SimpleMoteFinder simpleMoteFinder = new SimpleMoteFinder();
+		Mote mote = simpleMoteFinder.findMote();
 		mote.addCoreButtonListener(new CoreButtonListener() {
 		
 			public void buttonPressed(CoreButtonEvent evt) {
@@ -47,12 +51,12 @@ public class ButtonsDemo {
 		
 		});
 		
-		while (true) {
-			String line = System.console().readLine();
-			if (line.indexOf("q") != -1) {
-				mote.disconnect();
-				System.exit(0);
-			}
+		try {
+			Thread.sleep(60000l);
+		} catch (InterruptedException ex) {
+			log.error(ex.getMessage(), ex);
+		} finally {
+			mote.disconnect();
 		}
 	}
 }

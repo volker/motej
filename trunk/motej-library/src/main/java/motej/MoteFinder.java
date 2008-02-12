@@ -16,6 +16,8 @@
 package motej;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
@@ -26,8 +28,8 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.swing.event.EventListenerList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -36,7 +38,12 @@ import org.apache.commons.logging.LogFactory;
  */
 public class MoteFinder {
 	
-	private static MoteFinder instance;
+	// initialization on demand holder idiom
+	private static class SingletonHolder {
+		
+		private static final MoteFinder INSTANCE = new MoteFinder();
+		
+	}
 	
 	/**
 	 * Returns the <code>WiimoteFinder</code> instance.
@@ -44,26 +51,22 @@ public class MoteFinder {
 	 * @return WiimoteFinder
 	 */
 	public static MoteFinder getMoteFinder() {
-		synchronized (MoteFinder.class) {
-			if (instance == null)
-				instance = new MoteFinder();
-		}
 		try {
-			instance.localDevice = LocalDevice.getLocalDevice();
-			instance.discoveryAgent = instance.localDevice.getDiscoveryAgent();
-			return instance;
+			SingletonHolder.INSTANCE.localDevice = LocalDevice.getLocalDevice();
+			SingletonHolder.INSTANCE.discoveryAgent = SingletonHolder.INSTANCE.localDevice.getDiscoveryAgent();
+			return SingletonHolder.INSTANCE;
 		} catch (BluetoothStateException ex) {
-			throw new RuntimeException(ex.fillInStackTrace());
+			throw new RuntimeException(ex);
 		}
 	}
 
-	private Log log = LogFactory.getLog(MoteFinder.class);
+	private Logger log = LoggerFactory.getLogger(MoteFinder.class);
 	
 	private EventListenerList listenerList = new EventListenerList();
 	
-	private Object inquiryCompletedEvent = new Object();
-	
 	private DiscoveryAgent discoveryAgent;
+	
+	private Set<String> bluetoothAddressCache = new HashSet<String>();
 
 	protected final DiscoveryListener listener = new DiscoveryListener() {
 		
@@ -77,7 +80,7 @@ public class MoteFinder {
 							+ clazz.getServiceClasses());
 				} catch (IOException ex) {
 					log.error(ex.getMessage(), ex);
-					throw new RuntimeException(ex.fillInStackTrace());
+					throw new RuntimeException(ex);
 				}
 			}
 
@@ -90,24 +93,19 @@ public class MoteFinder {
 				throw new RuntimeException(ex);
 			}
 
-			final boolean advanced = advancedDiscovery;
-			Thread connectMote = new Thread(new Runnable() {
-
-				public void run() {
-					if (advanced) {
-						Mote mote = new Mote(device);
+			final String address = device.getBluetoothAddress();
+			
+			// is this already registered?
+			if (!bluetoothAddressCache.contains(address)) {
+				Thread connectThread = new Thread("connect: " + address) {
+					public void run() {
+						Mote mote = new Mote(address);
 						fireMoteFound(mote);
-					} else {
-						mote = new Mote(device);
-						synchronized (inquiryCompletedEvent) {
-							inquiryCompletedEvent.notifyAll();
-						}
-						// discoveryAgent.cancelInquiry(listener);
-					}
-				}
-
-			}, "ConnectThread");
-			connectMote.start();
+						bluetoothAddressCache.add(address);
+					};
+				};
+				connectThread.start();
+			}
 		}
 
 		public void inquiryCompleted(int discType) {
@@ -141,37 +139,12 @@ public class MoteFinder {
 
 	private LocalDevice localDevice;
 
-	private Mote mote;
-
-	private boolean advancedDiscovery = false;
-
-	protected MoteFinder() {
-	};
+	private MoteFinder() {};
 
 	public void addMoteFinderListener(MoteFinderListener listener) {
 		listenerList.add(MoteFinderListener.class, listener);
 	}
 	
-	public Mote findMote() {
-		try {
-			synchronized (inquiryCompletedEvent) {
-				discoveryAgent.startInquiry(DiscoveryAgent.GIAC, listener);
-				if (log.isInfoEnabled()) {
-					log.info("waiting for inquiry...");
-				}
-				inquiryCompletedEvent.wait();
-				if (log.isInfoEnabled()) {
-					log.info("found " + mote == null ? 0 : 1 + " mote.");
-				}
-			}
-			return mote;
-		} catch (BluetoothStateException ex) {
-			throw new RuntimeException(ex.fillInStackTrace());
-		} catch (InterruptedException ex) {
-			throw new RuntimeException(ex.fillInStackTrace());
-		}
-	}
-
 	protected void fireMoteFound(Mote mote) {
 		MoteFinderListener[] listeners = listenerList.getListeners(MoteFinderListener.class);
 		for (MoteFinderListener l : listeners) {
@@ -184,7 +157,6 @@ public class MoteFinder {
 	}
 	
 	public void startDiscovery() {
-		advancedDiscovery = true;
 		try {
 			discoveryAgent.startInquiry(DiscoveryAgent.GIAC, listener);
 		} catch (BluetoothStateException ex) {
@@ -194,24 +166,6 @@ public class MoteFinder {
 	
 	public void stopDiscovery() {
 		discoveryAgent.cancelInquiry(listener);
-		advancedDiscovery = false;
 	}
 
-//	public List<Mote> findPreknownOrCachedWiimotes() {
-//		try {
-//			RemoteDevice[] devices = discoveryAgent
-//					.retrieveDevices(DiscoveryAgent.CACHED
-//							| DiscoveryAgent.PREKNOWN);
-//			if (devices == null) {
-//				System.out.println("neither cached or preknown devices found.");
-//				return null;
-//			}
-//			for (int i = 0; i < devices.length; i++) {
-//				System.out.println(devices[i].getFriendlyName(false));
-//			}
-//		} catch (IOException ex) {
-//			throw new RuntimeException(ex.fillInStackTrace());
-//		}
-//		return null;
-//	}
 }

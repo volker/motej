@@ -16,7 +16,7 @@
 package motej.demos.accelerometer;
 
 import motej.Mote;
-import motej.MoteFinder;
+import motej.demos.common.SimpleMoteFinder;
 import motej.event.AccelerometerEvent;
 import motej.event.AccelerometerListener;
 import motej.request.ReportModeRequest;
@@ -37,7 +37,8 @@ public class AccelerometerDemo {
 		
 		};
 		
-		Mote mote = MoteFinder.getMoteFinder().findMote();
+		SimpleMoteFinder simpleMoteFinder = new SimpleMoteFinder();
+		Mote mote = simpleMoteFinder.findMote();
 		mote.addAccelerometerListener(listener);
 		mote.setReportMode(ReportModeRequest.DATA_REPORT_0x31);
 		

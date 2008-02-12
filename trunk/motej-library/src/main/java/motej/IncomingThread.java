@@ -22,8 +22,8 @@ import javax.microedition.io.Connector;
 
 import motej.request.ReportModeRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -34,7 +34,7 @@ class IncomingThread extends Thread {
 	
 	private static final long THREAD_SLEEP = 1l;
 
-	private Log log = LogFactory.getLog(IncomingThread.class);
+	private Logger log = LoggerFactory.getLogger(IncomingThread.class);
 
 	private Mote source;
 	
@@ -272,12 +272,15 @@ class IncomingThread extends Thread {
 			} catch (IOException ex) {
 				log.error("connection closed?", ex);
 				active = false;
+				// Only fire a disconnection event
+				// when something goes wrong
+				source.fireMoteDisconnectedEvent();
 			}
 		}
 		try {
 			incoming.close();
 		} catch (IOException ex) {
-			log.error(ex);
+			log.error(ex.getMessage(), ex);
 		}
 	}
 

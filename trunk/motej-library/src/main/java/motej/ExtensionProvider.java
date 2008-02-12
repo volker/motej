@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -33,7 +33,7 @@ public class ExtensionProvider {
 	
 	private static Map<String, Class<? extends Extension>> lookup;
 	
-	private Log log = LogFactory.getLog(ExtensionProvider.class);
+	private Logger log = LoggerFactory.getLogger(ExtensionProvider.class);
 	
 	@SuppressWarnings("unchecked")
 	public ExtensionProvider() {

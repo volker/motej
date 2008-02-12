@@ -33,11 +33,15 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import motej.CalibrationDataReport;
 import motej.IrCameraMode;
 import motej.IrCameraSensitivity;
 import motej.IrPoint;
 import motej.Mote;
-import motej.MoteFinder;
+import motej.demos.common.SimpleMoteFinder;
+import motej.demos.nunchuk.AccelerometerPanel;
+import motej.event.AccelerometerEvent;
+import motej.event.AccelerometerListener;
 import motej.event.CoreButtonEvent;
 import motej.event.CoreButtonListener;
 import motej.event.IrCameraEvent;
@@ -53,6 +57,9 @@ import motej.request.ReportModeRequest;
 public class MoteGui {
 	
 	private IrPoint p0, p1, p2, p3;
+	
+	private AccelerometerPanel accelerometerPanel;
+	
 	
 //	protected class AccelerometerComponent implements GLEventListener {
 //		
@@ -139,12 +146,8 @@ public class MoteGui {
 	protected Action findAction = new AbstractAction("Find Motes") {
 
 		public void actionPerformed(ActionEvent arg0) {
-			MoteFinder finder = MoteFinder.getMoteFinder();
-//			List<Wiimote> motes = finder.findNewDevices(30000l);
-			mote = finder.findMote();
-//			System.out.println("found " + motes.size() + " motes.");
-//			if (motes.size() > 0) {
-//				mote = motes.get(0);
+			SimpleMoteFinder simpleMoteFinder = new SimpleMoteFinder();
+			Mote mote = simpleMoteFinder.findMote();
 			if (mote != null) {
 				
 				while (mote.getStatusInformationReport() == null) {
@@ -168,17 +171,22 @@ public class MoteGui {
 					}
 				}
 				System.out.println(mote.getCalibrationDataReport());
+				CalibrationDataReport cali = mote.getCalibrationDataReport();
+				accelerometerPanel.setCalibrationDataX(cali.getZeroX(), cali.getGravityX());
+				accelerometerPanel.setCalibrationDataY(cali.getZeroY(), cali.getGravityY());
+				accelerometerPanel.setCalibrationDataZ(cali.getZeroZ(), cali.getGravityZ());
 				
-//				mote.addAccelerometerListener(new AccelerometerListener() {
-//				
-//					public void accelerometerChanged(AccelerometerEvent evt) {
+				mote.addAccelerometerListener(new AccelerometerListener<Mote>() {
+				
+					public void accelerometerChanged(AccelerometerEvent<Mote> evt) {
+						accelerometerPanel.accelerometerValueChanged(evt.getX(), evt.getY(), evt.getZ());
 //						accx = evt.getX();
 //						accy = evt.getY();
 //						accz = evt.getZ();
 ////						glpanel.repaint();
-//					}
-//				
-//				});
+					}
+				
+				});
 				
 				mote.addIrCameraListener(new IrCameraListener() {
 					
@@ -397,6 +405,9 @@ public class MoteGui {
 
 		JPanel centerPanel = new JPanel(new FlowLayout());
 		centerPanel.add(ircomp);
+		
+		accelerometerPanel = new AccelerometerPanel();
+		centerPanel.add(accelerometerPanel);
 //		centerPanel.add(glpanel);
 		
 		frame.getContentPane().add(centerPanel, BorderLayout.CENTER);

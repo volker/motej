@@ -19,15 +19,15 @@ import java.awt.Point;
 
 import javax.swing.event.EventListenerList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import motej.AbstractExtension;
 import motej.Mote;
 import motej.event.AccelerometerEvent;
 import motej.event.AccelerometerListener;
 import motej.event.DataEvent;
 import motej.event.DataListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -40,7 +40,7 @@ public class Nunchuk extends AbstractExtension implements DataListener {
 	
 	private Mote mote;
 	
-	private Log log = LogFactory.getLog(Nunchuk.class);
+	private Logger log = LoggerFactory.getLogger(Nunchuk.class);
 	
 	private NunchukCalibrationData calibrationData;
 
