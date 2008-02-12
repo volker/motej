@@ -16,7 +16,7 @@
 package motej.demos.ircamera;
 
 import motej.Mote;
-import motej.MoteFinder;
+import motej.demos.common.SimpleMoteFinder;
 import motej.event.IrCameraEvent;
 import motej.event.IrCameraListener;
 import motej.request.ReportModeRequest;
@@ -37,7 +37,8 @@ public class IrCameraDemo {
 		
 		};
 		
-		Mote mote = MoteFinder.getMoteFinder().findMote();
+		SimpleMoteFinder simpleMoteFinder = new SimpleMoteFinder();
+		Mote mote = simpleMoteFinder.findMote();
 		mote.addIrCameraListener(listener);
 		mote.enableIrCamera();
 		mote.setReportMode(ReportModeRequest.DATA_REPORT_0x36);
