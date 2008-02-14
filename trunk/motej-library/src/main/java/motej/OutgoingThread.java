@@ -80,7 +80,7 @@ class OutgoingThread extends Thread {
 		}
 
 		public void run() {
-			while (active) {
+			while (active || !requestQueue.isEmpty()) {
 				try {
 					if (rumbleMillis > 0) {
 						rumbleMillis -= THREAD_SLEEP;
