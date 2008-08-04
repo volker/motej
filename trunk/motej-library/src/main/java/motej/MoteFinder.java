@@ -85,7 +85,7 @@ public class MoteFinder {
 			}
 
 			try {
-				if (device.getFriendlyName(true).compareTo("Nintendo RVL-CNT-01") != 0) {
+				if (!device.getFriendlyName(true).startsWith("Nintendo")) { //("Nintendo RVL-CNT-01") != 0) {
 					return;
 				}
 			} catch (IOException ex) {

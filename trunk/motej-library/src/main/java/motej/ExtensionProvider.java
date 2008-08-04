@@ -73,7 +73,15 @@ public class ExtensionProvider {
 	}
 	
 	public Extension getExtension(byte[] id) {
-		String key = Integer.toHexString(id[0] & 0xff) + Integer.toHexString(id[1] & 0xff);
+		String id0 = Integer.toHexString(id[0] & 0xff);
+		if (id0.length() == 1) {
+			id0 = "0" + id0;
+		}
+		String id1 = Integer.toHexString(id[1] & 0xff);
+		if (id1.length() == 1) {
+			id1 = "0" + id1;
+		}
+		String key = id0 + id1;
 		Class<? extends Extension> clazz = lookup.get(key);
 		
 		if (clazz == null) {
