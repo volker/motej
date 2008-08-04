@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2008 Volker Fritzsch
+ * Copyright 2008 motej
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package motejx.extensions.nunchuk;
+package motejx.extensions.classic;
 
-import java.awt.Point;
+import java.util.EventListener;
 
 /**
- * 
+ *  
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class AnalogStickEvent {
+public interface ClassicControllerButtonListener extends EventListener {
 
-	protected Point point;
+	public void buttonPressed(ClassicControllerButtonEvent evt);
 	
-	protected Object source;
-	
-	public AnalogStickEvent(Object source, Point point) {
-		this.source = source;
-		this.point = point;
-	}
-
-	public Object getSource() {
-		return source;
-	}
-
-	public Point getPoint() {
-		return point;
-	}
-
 }

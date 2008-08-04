@@ -44,6 +44,10 @@ class IncomingThread extends Thread {
 
 	private L2CAPConnection incoming;
 
+	private IrPoint[] interleavedIrCameraData;
+
+	private int[] interleavedAccelerometerData;
+
 	protected IncomingThread(Mote source, String btaddress)
 			throws IOException, InterruptedException {
 		super("in:" + btaddress);
@@ -125,7 +129,7 @@ class IncomingThread extends Thread {
 
 		source.fireIrCameraEvent(IrCameraMode.EXTENDED, p0, p1, p2, p3);
 	}
-
+	
 	protected void parseExtensionData(byte[] bytes, int offset, int length) {
 		if (extension == null) {
 			return;
@@ -134,17 +138,93 @@ class IncomingThread extends Thread {
 		System.arraycopy(bytes, offset, extensionData, 0, length);
 		extension.parseExtensionData(extensionData);
 	}
-
-	protected void parseFullIrCameraData(byte[] bytes, int offset) {
-		throw new RuntimeException("full camera mode handling not implemented");
+	
+	protected void parseFullIrCameraData(byte[] bytes, int reportMode) {
+		if (interleavedIrCameraData == null) {
+			interleavedIrCameraData = new IrPoint[4];
+		}
+		if (reportMode == ReportModeRequest.DATA_REPORT_0x3e) {
+			int x0 = (bytes[5] & 0xff) ^ ((bytes[7] & 0x30) << 4);
+			int y0 = (bytes[6] & 0xff) ^ ((bytes[7] & 0xc0) << 2);
+			int size0 = bytes[7] & 0x0f;
+			int xmin0 = bytes[8] & 0x7f;
+			int ymin0 = bytes[9] & 0x7f;
+			int xmax0 = bytes[10] & 0x7f;
+			int ymax0 = bytes[11] & 0x7f;
+			int intensity0 = bytes[13] & 0xff;
+			interleavedIrCameraData[0] = new IrPoint(x0, y0, size0, xmin0, ymin0, xmax0, ymax0, intensity0);
+		
+			int x1 = (bytes[14] & 0xff) ^ ((bytes[16] & 0x30) << 4);
+			int y1 = (bytes[15] & 0xff) ^ ((bytes[16] & 0xc0) << 2);
+			int size1 = bytes[16] & 0x0f;
+			int xmin1 = bytes[17] & 0x7f;
+			int ymin1 = bytes[18] & 0x7f;
+			int xmax1 = bytes[19] & 0x7f;
+			int ymax1 = bytes[20] & 0x7f;
+			int intensity1 = bytes[22] & 0xff;
+			interleavedIrCameraData[1] = new IrPoint(x1, y1, size1, xmin1, ymin1, xmax1, ymax1, intensity1);
+		}
+		
+		if (reportMode == ReportModeRequest.DATA_REPORT_0x3f) {
+			int x2 = (bytes[5] & 0xff) ^ ((bytes[7] & 0x30) << 4);
+			int y2 = (bytes[6] & 0xff) ^ ((bytes[7] & 0xc0) << 2);
+			int size2 = bytes[7] & 0x0f;
+			int xmin2 = bytes[8] & 0x7f;
+			int ymin2 = bytes[9] & 0x7f;
+			int xmax2 = bytes[10] & 0x7f;
+			int ymax2 = bytes[11] & 0x7f;
+			int intensity2 = bytes[13] & 0xff;
+			interleavedIrCameraData[2] = new IrPoint(x2, y2, size2, xmin2, ymin2, xmax2, ymax2, intensity2);
+			
+			int x3 = (bytes[14] & 0xff) ^ ((bytes[16] & 0x30) << 4);
+			int y3 = (bytes[15] & 0xff) ^ ((bytes[16] & 0xc0) << 2);
+			int size3 = bytes[16] & 0x0f;
+			int xmin3 = bytes[17] & 0x7f;
+			int ymin3 = bytes[18] & 0x7f;
+			int xmax3 = bytes[19] & 0x7f;
+			int ymax3 = bytes[20] & 0x7f;
+			int intensity3 = bytes[22] & 0xff;
+			interleavedIrCameraData[3] = new IrPoint(x3, y3, size3, xmin3, ymin3, xmax3, ymax3, intensity3);
+		}
+		
+		if (interleavedIrCameraData[0] != null &&
+				interleavedIrCameraData[2] != null) {
+			IrPoint p0 = interleavedIrCameraData[0];
+			IrPoint p1 = interleavedIrCameraData[1];
+			IrPoint p2 = interleavedIrCameraData[2];
+			IrPoint p3 = interleavedIrCameraData[3];
+			interleavedIrCameraData = null;
+			source.fireIrCameraEvent(IrCameraMode.FULL, p0, p1, p2, p3);
+		}
 	}
 
-	protected void parseInterleavedAccelerometerData(byte[] bytes, int offset) {
-		throw new RuntimeException("interleaved accelerometer data handling not implemented");
-	}
-
-	protected void parseInterleavedCoreButtonData(byte[] bytes) {
-		throw new RuntimeException("interleaved core button data handling not implemented");
+	protected void parseInterleavedAccelerometerData(byte[] bytes, int reportMode) {
+		int x = 0;
+		int y = 0;
+		int z = 0;
+		
+		if (reportMode == ReportModeRequest.DATA_REPORT_0x3e) {
+			x = bytes[4] & 0xff;
+			z = ((bytes[3] & 0x60) << 1) ^ ((bytes[2] & 0x60) >> 1);
+		}
+		
+		if (reportMode == ReportModeRequest.DATA_REPORT_0x3f) {
+			y = bytes[4] & 0xff;
+			z = ((bytes[3] & 0x60) >> 3) ^ ((bytes[2] & 0x60) >> 5);
+		}
+		
+		if (interleavedAccelerometerData == null) {
+			interleavedAccelerometerData = new int[3];
+			interleavedAccelerometerData[0] ^= x;
+			interleavedAccelerometerData[1] ^= y;
+			interleavedAccelerometerData[2] ^= z;
+		} else {
+			x ^= interleavedAccelerometerData[0];
+			y ^= interleavedAccelerometerData[1];
+			z ^= interleavedAccelerometerData[2];
+			interleavedAccelerometerData = null;
+			source.fireAccelerometerEvent(x, y, z);
+		}
 	}
 
 	protected void parseMemoryData(byte[] bytes) {
@@ -252,11 +332,15 @@ class IncomingThread extends Thread {
 					break;
 
 				case ReportModeRequest.DATA_REPORT_0x3e:
-					log.error("interleaved reporting not implemented yet.");
+					parseCoreButtonData(buf);
+					parseInterleavedAccelerometerData(buf, ReportModeRequest.DATA_REPORT_0x3e);
+					parseFullIrCameraData(buf, ReportModeRequest.DATA_REPORT_0x3e);
 					break;
 
 				case ReportModeRequest.DATA_REPORT_0x3f:
-					log.error("interleaved reporting not implemented yet.");
+					parseCoreButtonData(buf);
+					parseInterleavedAccelerometerData(buf, ReportModeRequest.DATA_REPORT_0x3f);
+					parseFullIrCameraData(buf, ReportModeRequest.DATA_REPORT_0x3f);
 					break;
 
 				default:

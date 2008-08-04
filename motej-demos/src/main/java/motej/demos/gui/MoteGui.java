@@ -126,10 +126,12 @@ public class MoteGui {
 			Color origColor = g2.getColor();
 			g2.setColor(Color.BLACK);
 
-			g2.drawOval((int) p0.getX(), (int) p0.getY(), p0.getSize() * 5, p0.getSize() * 5);
-			g2.drawOval((int) p1.getX(), (int) p1.getY(), p1.getSize() * 5, p1.getSize() * 5);
-			g2.drawOval((int) p2.getX(), (int) p2.getY(), p2.getSize() * 5, p2.getSize() * 5);
-			g2.drawOval((int) p3.getX(), (int) p3.getY(), p3.getSize() * 5, p3.getSize() * 5);
+			System.out.println("Intensity: " + p0.intensity + " min.x: " + p0.min.x + " min.y: " + p0.min.y + " max.x: " + p0.max.x + " max.y: " + p0.max.y);
+			
+			g2.fillOval((int) p0.getX(), (int) p0.getY(), p0.getSize() * 5, p0.getSize() * 5);
+			g2.fillOval((int) p1.getX(), (int) p1.getY(), p1.getSize() * 5, p1.getSize() * 5);
+			g2.fillOval((int) p2.getX(), (int) p2.getY(), p2.getSize() * 5, p2.getSize() * 5);
+			g2.fillOval((int) p3.getX(), (int) p3.getY(), p3.getSize() * 5, p3.getSize() * 5);
 			g2.setColor(origColor);
 		}
 		
@@ -147,7 +149,7 @@ public class MoteGui {
 
 		public void actionPerformed(ActionEvent arg0) {
 			SimpleMoteFinder simpleMoteFinder = new SimpleMoteFinder();
-			Mote mote = simpleMoteFinder.findMote();
+			mote = simpleMoteFinder.findMote();
 			if (mote != null) {
 				
 				while (mote.getStatusInformationReport() == null) {
@@ -271,11 +273,27 @@ public class MoteGui {
 		}
 
 	};
+	protected Action cameraBasicAction = new AbstractAction("camera (basic / wii level 3)") {
+		
+		public void actionPerformed(ActionEvent arg0) {
+			mote.enableIrCamera(IrCameraMode.BASIC, IrCameraSensitivity.WII_LEVEL_3);
+		}
+	
+	};
+	
 
-	protected Action cameraExtendedAction = new AbstractAction("camera (extended)") {
+	protected Action cameraExtendedAction = new AbstractAction("camera (extended / Wii l3)") {
 
 		public void actionPerformed(ActionEvent arg0) {
-			mote.enableIrCamera(IrCameraMode.EXTENDED, IrCameraSensitivity.MARCAN);
+			mote.enableIrCamera(IrCameraMode.EXTENDED, IrCameraSensitivity.WII_LEVEL_3);
+		}
+
+	};
+	
+	protected Action cameraFullAction = new AbstractAction("camera (full / Wii l3)") {
+
+		public void actionPerformed(ActionEvent arg0) {
+			mote.enableIrCamera(IrCameraMode.FULL, IrCameraSensitivity.WII_LEVEL_3);
 		}
 
 	};
@@ -312,14 +330,14 @@ public class MoteGui {
 		
 	};
 
-	protected Action cameraBasicAction = new AbstractAction("camera (basic)") {
-	
+	protected Action report0x3eAction = new AbstractAction("Report: 0x3e") {
+		
 		public void actionPerformed(ActionEvent arg0) {
-			mote.enableIrCamera(IrCameraMode.BASIC, IrCameraSensitivity.MARCAN);
-		}
-	
+			mote.setReportMode(ReportModeRequest.DATA_REPORT_0x3e);
+		};
+		
 	};
-	
+
 	protected Action setLed1Action = new AbstractAction("LED 1") {
 
 		public void actionPerformed(ActionEvent arg0) {
@@ -422,9 +440,6 @@ public class MoteGui {
 		findButton.setAction(findAction);
 		topPanel.add(findButton);
 
-		JButton cachedButton = new JButton(cameraExtendedAction);
-		topPanel.add(cachedButton);
-
 		JButton led1Button = new JButton("LED 1");
 		led1Button.setAction(setLed1Action);
 		topPanel.add(led1Button);
@@ -444,9 +459,15 @@ public class MoteGui {
 		JButton rumbleButton = new JButton(rumbleAction);
 		topPanel.add(rumbleButton);
 		
-		JButton cameraButton = new JButton(cameraBasicAction);
-		topPanel.add(cameraButton);
+		JButton cameraBasicButton = new JButton(cameraBasicAction);
+		topPanel.add(cameraBasicButton);
 		
+		JButton cameraExtendedButton = new JButton(cameraExtendedAction);
+		topPanel.add(cameraExtendedButton);
+
+		JButton cameraFullButton = new JButton(cameraFullAction);
+		topPanel.add(cameraFullButton);
+
 		JButton report0x30 = new JButton(report0x30Action);
 		report0x30.setToolTipText("core buttons");
 		topPanel.add(report0x30);
@@ -462,6 +483,10 @@ public class MoteGui {
 		JButton report0x36 = new JButton(report0x36Action);
 		report0x36.setToolTipText("core buttons, ir (basic) and extension");
 		topPanel.add(report0x36);
+		
+		JButton report0x3e = new JButton(report0x3eAction);
+		report0x3e.setToolTipText("Interleaved Core Buttons and Accelerometer with 36 IR bytes");
+		topPanel.add(report0x3e);
 
 		feedbackButtonA = new JButton("A");
 		feedbackButtonA.setEnabled(false);

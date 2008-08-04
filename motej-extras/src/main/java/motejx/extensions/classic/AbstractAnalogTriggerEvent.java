@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2008 Volker Fritzsch
+ * Copyright 2007-2008 motej
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package motejx.extensions.nunchuk;
-
-import java.awt.Point;
+package motejx.extensions.classic;
 
 /**
  * 
  * <p>
  * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
  */
-public class AnalogStickEvent {
+public abstract class AbstractAnalogTriggerEvent {
 
-	protected Point point;
-	
 	protected Object source;
 	
-	public AnalogStickEvent(Object source, Point point) {
+	protected int trigger;
+	
+	public AbstractAnalogTriggerEvent(Object source, int trigger) {
 		this.source = source;
-		this.point = point;
+		this.trigger = trigger;
 	}
 
 	public Object getSource() {
 		return source;
 	}
 
-	public Point getPoint() {
-		return point;
+	public int getTrigger() {
+		return trigger;
 	}
-
+	
 }

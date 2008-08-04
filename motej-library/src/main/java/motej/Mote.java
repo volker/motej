@@ -155,19 +155,43 @@ public class Mote {
 	 * Enables the IR Camera in basic mode with Marcan sensitivity.
 	 */
 	public void enableIrCamera() {
-		enableIrCamera(IrCameraMode.BASIC, IrCameraSensitivity.MARCAN);
+		enableIrCamera(IrCameraMode.BASIC, IrCameraSensitivity.WII_LEVEL_3);
 	}
 
+//	public void enableIrCamera(IrCameraMode mode, IrCameraSensitivity sensitivity) {
+//		// 1. Enable IR Camera (Send 0x04 to Output Report 0x13)
+//		outgoing.sendRequest(new RawByteRequest(new byte[] { 82, 19, 4 }));
+//
+//		// 2. Enable IR Camera 2 (Send 0x04 to Output Report 0x1a)
+//		outgoing.sendRequest(new RawByteRequest(new byte[] { 82, 26, 4 }));
+//
+//		// 3. Write 0x08 to register 0xb00030
+//		outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xb0,
+//				0x00, 0x30 }, new byte[] { 0x08 }));
+//
+//		// 4. Write Sensitivity Block 1 to registers at 0xb00000
+//		outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xb0,
+//				0x00, 0x00 }, sensitivity.block1()));
+//
+//		// 5. Write Sensitivity Block 2 to registers at 0xb0001a
+//		outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xb0,
+//				0x00, 0x1a }, sensitivity.block2()));
+//
+//		// 6. Write Mode Number to register 0xb00033
+//		outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xb0,
+//				0x00, 0x33 }, new byte[] { mode.modeAsByte() }));
+//	}
+	
 	public void enableIrCamera(IrCameraMode mode, IrCameraSensitivity sensitivity) {
-		// 1. Enable IR Camera (Send 0x04 to Output Report 0x13)
-		outgoing.sendRequest(new RawByteRequest(new byte[] { 82, 19, 4 }));
+		// 1. Enable IR Pixel Clock (Send 0x06 to Output Report 0x13)
+		outgoing.sendRequest(new RawByteRequest(new byte[] { 82, 0x13, 0x06 }));
 
-		// 2. Enable IR Camera 2 (Send 0x04 to Output Report 0x1a)
-		outgoing.sendRequest(new RawByteRequest(new byte[] { 82, 26, 4 }));
+		// 2. Enable IR Logic (Send 0x06 to Output Report 0x1a)
+		outgoing.sendRequest(new RawByteRequest(new byte[] { 82, 0x1a, 0x06 }));
 
-		// 3. Write 0x08 to register 0xb00030
+		// 3. Write 0x01 to register 0xb00030
 		outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xb0,
-				0x00, 0x30 }, new byte[] { 0x08 }));
+				0x00, 0x30 }, new byte[] { 0x01 }));
 
 		// 4. Write Sensitivity Block 1 to registers at 0xb00000
 		outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xb0,
@@ -180,6 +204,10 @@ public class Mote {
 		// 6. Write Mode Number to register 0xb00033
 		outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xb0,
 				0x00, 0x33 }, new byte[] { mode.modeAsByte() }));
+		
+		// 7. Write 0x08 to register 0xb00030
+		outgoing.sendRequest(new WriteRegisterRequest(new byte[] { (byte) 0xb0,
+				0x00, 0x30 }, new byte[] { 0x08 }));
 	}
 
 	@Override
@@ -382,6 +410,15 @@ public class Mote {
 	
 	public void readRegisters(byte[] offset, byte[] size) {
 		outgoing.sendRequest(new ReadRegisterRequest(offset, size));
+	}
+	
+	public void writeRegisters(byte[] offset, byte[] payload) {
+		outgoing.sendRequest(new WriteRegisterRequest(offset, payload));
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends Extension> T getExtension() {
+		return (T) currentExtension;
 	}
 	
 	@Override
