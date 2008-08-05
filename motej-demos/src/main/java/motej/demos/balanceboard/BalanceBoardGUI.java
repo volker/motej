@@ -30,6 +30,8 @@ import javax.swing.SwingUtilities;
 import motej.Mote;
 import motej.MoteFinder;
 import motej.MoteFinderListener;
+import motej.event.CoreButtonEvent;
+import motej.event.CoreButtonListener;
 import motej.request.ReportModeRequest;
 import motejx.extensions.balanceboard.BalanceBoard;
 
@@ -49,6 +51,13 @@ public class BalanceBoardGUI {
 		public void moteFound(final Mote m) {
 			System.out.println("Found mote!");
 			mote = m;
+			mote.setPlayerLeds(new boolean[] { true, false, false, false });
+			mote.addCoreButtonListener(new CoreButtonListener() {
+			
+				public void buttonPressed(CoreButtonEvent evt) {
+					System.out.println("Button pressed: " + evt.getButton());
+				}
+			});
 		}
 	};
 	
