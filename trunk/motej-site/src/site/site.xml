@@ -48,17 +48,15 @@
 			<item name="User Guide" href="user_guide.html" />
 			<item name="Examples" href="examples.html" />
 			<item name="motej library" href="motej-library.html" collapse="true">
-				<item name="JavaDocs" href="reference/0.8-SNAPSHOT/motej-library/apidocs/index.html" />
-				<item name="Source Xref" href="reference/0.8-SNAPSHOT/motej-library/xref/index.html" />
+				<item name="JavaDocs" href="reference/0.9/motej-library/apidocs/index.html" />
+				<item name="Source Xref" href="reference/0.9/motej-library/xref/index.html" />
 			</item>
 			<item name="motej extras" href="motej-extras.html" collapse="false">
-			<!-- 
-				<item name="JavaDocs" href="reference/0.8-SNAPSHOT/motej-extras/apidocs/index.html" />
-				<item name="Source Xref" href="reference/0.8-SNAPSHOT/motej-extras/xref/index.html" />
-			-->
+				<item name="JavaDocs" href="reference/0.9/motej-extras/apidocs/index.html" />
+				<item name="Source Xref" href="reference/0.9/motej-extras/xref/index.html" />
 			</item>
 			<item name="motej demos" href="motej-demos.html" collapse="true">
-				<item name="Source Xref" href="reference/0.8-SNAPSHOT/motej-demos/xref/index.html" />
+				<item name="Source Xref" href="reference/0.9/motej-demos/xref/index.html" />
 			</item>
 		</menu>
 
