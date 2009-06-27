@@ -31,6 +31,8 @@ import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.intel.bluetooth.BlueCoveConfigProperties;
+
 /**
  * 
  * <p>
@@ -52,6 +54,9 @@ public class MoteFinder {
 	 */
 	public static MoteFinder getMoteFinder() {
 		try {
+			// disable PSM minimum flag because the wiimote has a PSM below 0x1001
+			System.setProperty(BlueCoveConfigProperties.PROPERTY_JSR_82_PSM_MINIMUM_OFF, "true");
+
 			SingletonHolder.INSTANCE.localDevice = LocalDevice.getLocalDevice();
 			SingletonHolder.INSTANCE.discoveryAgent = SingletonHolder.INSTANCE.localDevice.getDiscoveryAgent();
 			return SingletonHolder.INSTANCE;
