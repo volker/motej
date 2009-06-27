@@ -2,7 +2,7 @@
  Features
  -----
  -----
- 2008-01-03
+ 2009-06-27
  -----
 
 Features
@@ -13,7 +13,7 @@ Features
 
  * Discover and connect to Wiimote devices
  
- * Wiimote IR Camera in both basic and extended mode
+ * Wiimote IR Camera in basic, extended and interleaved mode
  
  * Wiimote Accelerometer
  
@@ -33,4 +33,12 @@ Features
 
 * motej extras
 
- Features will be added as soon as work on motej extras has started.
+ * support for extension controllers
+
+  * balance board
+
+  * classic controller
+
+  * nunchuck controller
+
+ * some helper/adapter classes to ease your wiimote development
