@@ -2,9 +2,9 @@
  motej extras
  -----
  -----
- 2008-01-03
+ 2009-06-27
  -----
 
 motej extras
 
- The motej extras package will provide additional APIs for e.g. roll and distance calculation based on IR and Accelerometer data provided by <motej library.> 
+ The motej extras package provides support for extension controllers and additional APIs for e.g. distance calculation based on IR data provided by <motej library.> 

@@ -2,33 +2,16 @@
  Examples
  -----
  -----
- 2008-01-05
+ 2009-06-27
  -----
 
 Examples
 
  The motej-demos package contains sample code, that should help you in adopting motej for your own projects.
  
-* SimpleDiscovery Example
-
- Getting access to a Mote Instance is actually quite easy. Just call the findMote() method of the singleton MoteFinder instance.
- 
-+--
-	public static void main(String[] args) throws InterruptedException {
-		Mote mote = MoteFinder.getMoteFinder().findMote();
-		mote.setPlayerLeds(new boolean[] {true, false, false, false});
-		Thread.sleep(5000l);
-		mote.disconnect();
-	}
-+--
-
- In this example, we look up a Wiimote (make sure you've pressed both <1> and <2> buttons to put the Wiimote into discoverable mode), set the LED indicating the first player and disconnect after 5 seconds.
- 
- {{{reference/0.8-SNAPSHOT/motej-demos/xref/motej/demos/discovery/SimpleDiscovery.html}Source Code}}
- 
 * AdvancedDiscovery Example
 
- Instead of calling the MoteFinder.findMote() method mentioned above, you can also add a MoteFinderListener to the MoteFinder instance and inquire Motes using startDiscovery and stopDiscovery.
+ To discover and connect a Wiimote, implement a MoteFinderListener, add it to the MoteFinder and start the Discovery, as shown below.
 
 +--
 	MoteFinderListener listener = new MoteFinderListener() {
