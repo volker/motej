@@ -36,7 +36,8 @@ import com.intel.bluetooth.BlueCoveConfigProperties;
 /**
  * 
  * <p>
- * @author <a href="mailto:vfritzsch@users.sourceforge.net">Volker Fritzsch</a>
+ * @author Volker Fritzsch
+ * @author Christoph Krichenbauer
  */
 public class MoteFinder {
 	
@@ -72,6 +73,22 @@ public class MoteFinder {
 	private DiscoveryAgent discoveryAgent;
 	
 	private Set<String> bluetoothAddressCache = new HashSet<String>();
+	
+	private Set<DiscoveryListener> discoveryListeners;
+	
+	public void addDiscoveryListener(DiscoveryListener listener) {
+		if (discoveryListeners == null) {
+			discoveryListeners = new HashSet<DiscoveryListener>();
+		}
+		
+		discoveryListeners.add(listener);
+	}
+	
+	public void removeDiscoveryListener(DiscoveryListener listener) {
+		if (discoveryListeners != null) {
+			discoveryListeners.remove(listener);
+		}
+	}
 
 	protected final DiscoveryListener listener = new DiscoveryListener() {
 		
@@ -110,6 +127,10 @@ public class MoteFinder {
 					};
 				};
 				connectThread.start();
+				
+				for (DiscoveryListener delegate : discoveryListeners) {
+					delegate.deviceDiscovered(device, clazz);
+				}
 			}
 		}
 
@@ -131,14 +152,26 @@ public class MoteFinder {
 					log.info("inquiry error");
 				}
 			}
+			
+			for (DiscoveryListener delegate : discoveryListeners) {
+				delegate.inquiryCompleted(discType);
+			}
 		}
 
-		public void servicesDiscovered(int arg0, ServiceRecord[] arg1) {
-			// unused
+		public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+			// internally unused
+			
+			for (DiscoveryListener delegate : discoveryListeners) {
+				delegate.servicesDiscovered(transID, servRecord);
+			}
 		}
 
-		public void serviceSearchCompleted(int arg0, int arg1) {
-			// unused
+		public void serviceSearchCompleted(int transID, int respCode) {
+			// internally unused
+			
+			for (DiscoveryListener delegate : discoveryListeners) {
+				delegate.serviceSearchCompleted(transID, respCode);
+			}
 		}
 	};
 
