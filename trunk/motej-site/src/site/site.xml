@@ -14,13 +14,11 @@
 	<body>
 
 		<head>
-			<script type="text/javascript">
-				var gaJsHost = (("https:" == document.location.protocol)
-				? "https:ssl." : "http:www.");
-				document.write(unescape("%3Cscript src='" + gaJsHost +
-				"google-analytics.com/ga.js'
-				type='text/javascript'%3E%3C/script%3E"));
-			</script>
+			<!-- <script type="text/javascript">
+				var gaJsHost = (("https:" == document.location.protocol) ? "https:ssl." : "http:www.");
+				document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+			</script> -->
+			<script type="text/javascript" src="http://www.google-analytics.com/ga.js"></script>
 			<script type="text/javascript">
 				var pageTracker = _gat._getTracker("UA-402289-5");
 				pageTracker._initData(); pageTracker._trackPageview();
@@ -47,16 +45,16 @@
 		<menu name="Documentation">
 			<item name="User Guide" href="user_guide.html" />
 			<item name="Examples" href="examples.html" />
-			<item name="motej library" href="motej-library.html" collapse="true">
-				<item name="JavaDocs" href="reference/0.9/motej-library/apidocs/index.html" />
-				<item name="Source Xref" href="reference/0.9/motej-library/xref/index.html" />
+			<item name="motej library" href="motej-library.html" collapse="false">
+				<item name="JavaDocs" href="reference/1.0-SNAPSHOT/motej-library/apidocs/index.html" />
+				<item name="Source Xref" href="reference/1.0-SNAPSHOT/motej-library/xref/index.html" />
 			</item>
 			<item name="motej extras" href="motej-extras.html" collapse="false">
-				<item name="JavaDocs" href="reference/0.9/motej-extras/apidocs/index.html" />
-				<item name="Source Xref" href="reference/0.9/motej-extras/xref/index.html" />
+				<item name="JavaDocs" href="reference/1.0-SNAPSHOT/motej-extras/apidocs/index.html" />
+				<item name="Source Xref" href="reference/1.0-SNAPSHOT/motej-extras/xref/index.html" />
 			</item>
-			<item name="motej demos" href="motej-demos.html" collapse="true">
-				<item name="Source Xref" href="reference/0.9/motej-demos/xref/index.html" />
+			<item name="motej demos" href="motej-demos.html" collapse="false">
+				<item name="Source Xref" href="reference/1.0-SNAPSHOT/motej-demos/xref/index.html" />
 			</item>
 		</menu>
 
