@@ -60,10 +60,36 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<links>
+						<link>http://java.sun.com/j2se/1.5.0/docs/api/</link>
+					</links>
+					<footer>
+						<![CDATA[
+						<script type="text/javascript" src="http://www.google-analytics.com/ga.js"></script>
+						<script type="text/javascript">
+							var pageTracker = _gat._getTracker("UA-402289-5");
+							pageTracker._initData(); pageTracker._trackPageview();
+						</script>
+						]]>
+					</footer>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jxr-plugin</artifactId>
+				<configuration>
+					<bottom>
+						Copyright &copy; {inceptionYear}-{currentYear} ${project.organization.name}. All Rights Reserved.
+						<![CDATA[
+						<script type="text/javascript" src="http://www.google-analytics.com/ga.js"></script>
+						<script type="text/javascript">
+							var pageTracker = _gat._getTracker("UA-402289-5");
+							pageTracker._initData(); pageTracker._trackPageview();
+						</script>
+						]]>
+					</bottom>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
