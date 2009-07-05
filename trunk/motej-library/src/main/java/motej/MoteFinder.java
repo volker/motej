@@ -74,20 +74,14 @@ public class MoteFinder {
 	
 	private Set<String> bluetoothAddressCache = new HashSet<String>();
 	
-	private Set<DiscoveryListener> discoveryListeners;
+	private Set<DiscoveryListener> discoveryListeners = new HashSet<DiscoveryListener>();
 	
 	public void addDiscoveryListener(DiscoveryListener listener) {
-		if (discoveryListeners == null) {
-			discoveryListeners = new HashSet<DiscoveryListener>();
-		}
-		
 		discoveryListeners.add(listener);
 	}
 	
 	public void removeDiscoveryListener(DiscoveryListener listener) {
-		if (discoveryListeners != null) {
-			discoveryListeners.remove(listener);
-		}
+		discoveryListeners.remove(listener);
 	}
 
 	protected final DiscoveryListener listener = new DiscoveryListener() {
